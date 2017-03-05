@@ -17,7 +17,7 @@ install: true
 #
 # Unit tests
 #
-script:
+script: true
 #
 # Deploy to Google App Engine
 #
