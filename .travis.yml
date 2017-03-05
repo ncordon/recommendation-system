@@ -24,7 +24,7 @@ script: true
 deploy:
   provider: gae
   keyfile: secret.json
-  project: recommendation-system
+  project: recommendation-system-160616
   # Make deploy without version
   default: true
   # Make deploy with master branch only
