@@ -10,7 +10,10 @@ before_install:
 #
 python:
   - 2.7
-install:
+#
+# Skips installation step
+#
+install: true
 #
 # Unit tests
 #
