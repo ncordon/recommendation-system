@@ -1,0 +1,7 @@
+deploy:
+  provider: gae
+  keyfile: secret.json
+  project: recommendation-system
+before_install:
+- openssl aes-256-cbc -K $encrypted_7000bf93944d_key -iv $encrypted_7000bf93944d_iv
+  -in secret.json.enc -out secret.json -d

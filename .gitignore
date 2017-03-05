@@ -87,3 +87,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+
+# Client-secret for AppEngine without encryption
+secret.json
