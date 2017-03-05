@@ -25,3 +25,7 @@ deploy:
   provider: gae
   keyfile: secret.json
   project: recommendation-system
+  # Make deploy without version
+  default: true
+  # Make deploy with master branch only
+  on: master
