@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # Copyright 2016 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,15 +15,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import webapp2
+from flask import *
 
+app = Flask(__name__)
 
-class MainPage(webapp2.RequestHandler):
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/plain'
-        self.response.write('Dani es fantastico.')
+@app.route("/")
+def index():
+    return render_template("index.html")
 
+#@app.errorhandler(404)
+#def not_found(error):
+#    return render_template("404.html"), 404
 
-app = webapp2.WSGIApplication([
-    ('/', MainPage),
-], debug=True)
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', threaded=True)
