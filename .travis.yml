@@ -1,21 +1,16 @@
 language: python
 #
-# Decrypt secret file
+# Decrypt secret file and install dependences
 #
 before_install:
 - openssl aes-256-cbc -K $encrypted_7000bf93944d_key -iv $encrypted_7000bf93944d_iv
   -in secret.json.enc -out secret.json -d
+- pip install -t libtest flask
 #
 # Python version and requirements
 #
 python:
   - 2.7
-#
-# Install dependences
-#
-before_install:
-  - pip install -t libtest flask
-  - git add -f libtest/*
 #
 #
 # Skips installation step
