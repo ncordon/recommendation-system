@@ -15,6 +15,7 @@ python:
 #
 install:
   - pip install -t libtest flask
+  - git add libtest/*
 #
 # Unit tests
 #
