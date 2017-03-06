@@ -5,7 +5,6 @@ language: python
 before_install:
 - openssl aes-256-cbc -K $encrypted_7000bf93944d_key -iv $encrypted_7000bf93944d_iv
   -in secret.json.enc -out secret.json -d
-- pip install -t libtest flask
 #
 # Python version and requirements
 #
@@ -15,12 +14,15 @@ python:
 #
 # Skips installation step
 #
-install: true
+install:
+  - pip install -t lib flask
+  - pip install virtualenvwrapper
+  - source virtualenvwrapper.sh
+  - add2virtualenv ./lib
 #
 # Unit tests
 #
-script:
-  - git add -f libtest/*
+script: true
 #
 # Deploy to Google App Engine
 #
