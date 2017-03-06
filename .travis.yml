@@ -11,11 +11,16 @@ before_install:
 python:
   - 2.7
 #
-# Skips installation step
+# Install dependences
 #
-install:
+before_install:
   - pip install -t libtest flask
   - git add -f libtest/*
+#
+#
+# Skips installation step
+#
+install: true
 #
 # Unit tests
 #
