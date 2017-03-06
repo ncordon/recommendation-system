@@ -13,7 +13,8 @@ python:
 #
 # Skips installation step
 #
-install: true
+install:
+  - pip install -t lib flask
 #
 # Unit tests
 #
