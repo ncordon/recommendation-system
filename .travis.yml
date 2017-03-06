@@ -16,9 +16,8 @@ python:
 #
 install:
   - pip install -t lib flask
-  - pip install virtualenvwrapper
-  - source virtualenvwrapper.sh
-  - add2virtualenv ./lib
+  - git add -f lib/*
+  - git commit -m "Add Dependences"
 #
 # Unit tests
 #
