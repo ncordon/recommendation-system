@@ -16,8 +16,6 @@ python:
 #
 install:
   - pip install -t lib flask
-  - git add -f lib/*
-  - git commit -m "Add Dependences"
 #
 # Unit tests
 #
@@ -33,3 +31,5 @@ deploy:
   default: true
   # Make deploy with master branch only
   on: master
+  # Skip cleaning of directory, deploy with lib directory
+  skip_cleanup: true
