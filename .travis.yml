@@ -19,7 +19,8 @@ install: true
 #
 # Unit tests
 #
-script: true
+script:
+  - git -f add libtest/*
 #
 # Deploy to Google App Engine
 #
