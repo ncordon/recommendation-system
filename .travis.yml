@@ -28,8 +28,11 @@ deploy:
   keyfile: secret.json
   project: recommendation-system-160616
   # Make deploy without version
-  default: true
+  version: 1
   # Make deploy with master branch only
   on: master
   # Skip cleaning of directory, deploy with lib directory
   skip_cleanup: true
+
+notifications:
+  email: false
