@@ -146,6 +146,8 @@ $for(header-includes)$
 $header-includes$
 $endfor$
 
+\def\tightlist{}
+
 \begin{document}
 $if(title)$
 \maketitle
