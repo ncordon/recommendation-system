@@ -8,6 +8,7 @@ title: "Sistema de recomendación de música"
 lang: spanish
 date: \today
 papersize: A4
+geometry: left=4cm, right=2cm
 
 # Especifica que queremos un índice
 toc-title: "Índice de contenidos"
@@ -38,13 +39,18 @@ Nuestro sistema pide al usuario un determinado número de grupos afines (grupos 
 
 En nuestro punto de vista funcional reseñamos los siguientes elementos:
 
-* Elementos funcionales: 
-  - Interfaz de usuario: se encarga de gestionar la petición de grupos afines, devolver las 
-  recomendaciones, y preguntar por el acierto de dichas recomendaciones.
-
+  - **Navegador web**: elemento funcional externo, que se ejecuta del lado del cliente. Accede a través de la interfaz de predicciones, mediante peticiones HTTP al *gestor de predicciones*.
+  - **Gestor de predicciones**: se ha pensado en este módulo como un elemento que sintentiza todos los grupos afines sugeridos para unos grupos modelo de entrada, escoge cuáles mostrarle al usuario y devuelve la respuesta al navegador web. Solicita al *gestor de datos* la información disponible para grupos afines a los introducidos por el usuario en el navegador web.
+  - **Gestor de datos de grupos**: se encarga de acceder a los datos de grupos, y en caso de no existir o estar desactualizados, llama al *recolector de datos*. Caso opuesto devuelve la información al *gestor de predicciones*.
+  - **Recolector de datos**: se encargar de acceder a los datos a través de las APIs o el *scrapeo* y los devuelve al gestor de datos de grupos para la actualización en la base de datos.
+  
+En nuestro caso se ha decidido separar en un único módulo funcional el acceso a la base de datos (escritura y lectura de información de grupos afines).  
+  
 \imgn{1}{./img/funcional.png}
 
 ## Punto de vista de concurrencia
+
+\imgn{1}{./img/concurrencia.png}
 
 \imgn{1}{./img/concurrencia-estados.png}
 
