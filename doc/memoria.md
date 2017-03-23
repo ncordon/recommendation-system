@@ -50,9 +50,16 @@ En nuestro caso se ha decidido separar en un único módulo funcional el acceso 
 
 ## Punto de vista de concurrencia
 
-\imgn{1}{./img/concurrencia.png}
+Hay varios estados por los que tiene que pasar el sistema:
+
+ - **Solicitud de grupos modelo**: el usuario debe introducir una serie de grupos que ya le gustan.
+ - **Solicitud de grupos afines**: una vez se han introducido los grupos modelo, se solicitan los grupos afines al sistema.
+- **Devuelve resultado**: en caso de que haya datos para los grupos modelo introducidos, se devuelve el resultado y llegamos al estado final.
+- **Actualización de grupos afines**: caso de que no existan datos, o lleven sin actualizarse un determinado tiempo, se recolectan los datos y se escriben en la base de datos, y se procede al estado *Devuelve resultado*.
 
 \imgn{1}{./img/concurrencia-estados.png}
+
+\imgn{1}{./img/concurrencia.png}
 
 
 ## Punto de vista de despliegue
