@@ -138,6 +138,7 @@ El presupuesto se basa principalmente en el diagrama de despliegue. Asumiendo qu
     * Luz.
   * Personal/Mantenimiento.
 
+
   | Elementos    | Desglose | Coste inicial | Coste inicial por usuario | coste mensual fijo |  Coste mensual por usuario |
   |-----------------|--------------|--------------|--------------|-------------|-------------|
   | Servidor | - CPU: Quad-Core <br> - RAM: 8-16 GB <br> - HDD Online: 20 GB <br> - HDD Offline: 30 GB <br> - Refrigeración | 1431.67 € | 14.3167 - 28.6324 € | 119,3058 € | 1,193058 - 2,3861 |
@@ -146,7 +147,18 @@ El presupuesto se basa principalmente en el diagrama de despliegue. Asumiendo qu
   | Mantenimiento |
   | Personal |
   | Total |
-
+  
 ## Sistema basado en la nube
+    
+Estimación con AppEngine:
 
+* 1 instancia por mes
+  * 219 horas de cálculo CPU al mes (aprox 20 minutos cada hora).
+  * Memoria usada: 91.25 GB al mes.
+  * Disco usado: 30 GB al mes.
+  * 300 MB de tráfico saliente al mes.
+  * Almacenamiento cloud: 20 GB
+  
+Total: 44.20\$ al mes $\approx$ 41€ al mes.
+  
 # Diseño arquitectonico
