@@ -30,7 +30,23 @@ header-includes:
 
 # Descripción
 
-#Punto de vista de despliegue
+Nuestro sistema pide al usuario un determinado número de grupos afines (grupos que le agradan). A partir de dichos grupos obtenemos una predicción, basándonos en grupos afines obtenidos a partir de las APIs de Youtube y de Spotify y las recomendaciones previamente almacenadas para los grupos afines. Para los grupos sugeridos además, proporciona información biográfica, álbumes de dichos grupos, etc.
+
+# Punto de vista funcional
+
+En nuestro punto de vista funcional reseñamos los siguientes elementos:
+
+* Elementos funcionales: 
+  - Interfaz de usuario: se encarga de gestionar la petición de grupos afines, devolver las 
+  recomendaciones, y preguntar por el acierto de dichas recomendaciones.
+
+\imgn{1}{./img/funcional.png}
+
+# Punto de vista de concurrencia
+
+\imgn{1}{./img/concurrencia-estados.png}
+
+# Punto de vista de despliegue
 En esta vista se describe el entorno en el que el sistema será desplegado, incluyendo cada una de las dependencias del mismo. Para este apartado es necesario considerar los siguientes puntos:
 
   * Tipo de Hardware requerido.
@@ -62,7 +78,7 @@ En el primer diagrama se considera el servidor recomendador de manera independie
 
 Esta interpretación del sistema desde el punto de vista del despliegue se realiza sin tener en cuenta el servicio Google App Engine que se usará en la práctica para trabajar, puesto que el servicio sustituirá esta parte del diseño.
 
-#Punto de vista operacional
+# Punto de vista operacional
 
 En esta vista se describe como el sistema funciona, será administrado y mantenido cuando el sistema está funcionando en su entorno de producción. Es necesario considerar los siguientes puntos:
 
@@ -70,7 +86,7 @@ En esta vista se describe como el sistema funciona, será administrado y manteni
   * Migración de funcionalidades y datos.
   * Backup y restauración del sistema.
 
-##Instalación y actualización
+## Instalación y actualización
 El modelo de instalación para el sistema de recomendación de música debe constar de los siguientes elementos instalados en el siguiente orden:
   * Grupos de instalación:
     * Python 2.7: Contiene todo el software necesario para desarrollar el sistema de recomendación, la instalación depende del sistema:
@@ -83,17 +99,17 @@ El modelo de instalación para el sistema de recomendación de música debe cons
     * Base de datos: Google App engine trabaja directamente con una base de datos noSQL, tan solo sería necesario instalar el esquema de base de datos en el sistema.
     * Librería Recomendadora: Se trata de la librería principal del sistema, se darán más detalles de instalación más adelante.
 
-##Migración del sistema y los datos
+## Migración del sistema y los datos
 La migración de las funcionalidades podrían realizarse de manera que la antigua versión del sistema se continúe ejecutando de forma paralela a la del sistema con las nuevas o mejoradas funcionalidades, esto ocurre hasta que este último este totalmente operativo entonces se para la ejecución del sistema anterior. Esto es debido a que en nuestro sistema no se realizan peticiones críticas que necesiten de constante rigor. Aunque también sería posible adoptar el modelo big bang, es decir reinicios programados cada cierto tiempo que reinicien las funcionalidades del sistema para aplicar las actualizaciones o añadir nuevas funcionalidades.
 
 La migración de datos es una operación más crítica en el caso de que deba realizarse durante el funcionamiento del sistema, en el caso del modelo big bang es tan sencillo como realizar una copia de la base de datos con el nombre deseado mientras que el sistema está apagado, estaría programado para que se realizara antes del inicio del sistema. En el caso de que la migración se produzca durante la ejecución del sistema se realiza creando una nueva base de datos, se extraen los datos actuales de la anterior base de datos y posteriormente se cargan en la nueva base de datos en el tiempo, se irán realizando las mismas operaciones en ambas bases de datos hasta que las dos llegan al punto en que son iguales y se continua con la nueva base de datos tal y como se refleja en el siguiente gráfico:
 
 \imgn{1}{./img/migration.png}
 
-##Backup y restauración del sistema
+## Backup y restauración del sistema
 El sistema realizará de forma programada copias de la base de datos y se almacenará en un disco duro no conectada a la red, cuya única finalidad es almacenar los datos fechados de cada copia de la base de datos. En caso de que sea necesario una restauración de la base de datos se podría realizar la misma técnica empleada en la migración pero en sentido opuesto.
 
-#Presupuesto
+# Presupuesto
 El presupuesto se basa principalmente en el diagrama de despliegue. Asumiendo que el proyecto recibe el visto bueno y suponiendo que el sistema será capaz de atender al menos a 50-100 usuarios concurrentes en su inicio podemos definir los siguientes presupuestos:
 
 ## Sistema "in House"
