@@ -1,4 +1,4 @@
----
+﻿---
 author:
 - Lothar Soto Palma
 - Daniel López García
@@ -47,6 +47,16 @@ En nuestro punto de vista funcional reseñamos los siguientes elementos:
 En nuestro caso se ha decidido separar en un único módulo funcional el acceso a la base de datos (escritura y lectura de información de grupos afines).  
 
 \imgn{1}{./img/funcional.png}
+
+## Punto de vista de informaciónn
+
+La información del sistema se almacenará de la siguiente forma:
+
+  - **Grupo**: representa la información relativa a un grupo. Cada grupo contiene uno o varios discos que a su vez estan formados por varias canciones.
+  - **Recomendación**: clase para representar la gestión de predicciones. Dado que solo usaremos una instancia del recomendador usaremos una clase singleton.
+  - **Respuesta**: cada uno de los objetos producidos por el recomendador como respuesta a una petición.
+
+\imgn{1}{./img/clases.png}
 
 ## Punto de vista de concurrencia
 
@@ -105,6 +115,10 @@ En esta vista se describe como el sistema funciona, será administrado y manteni
   * Backup y restauración del sistema.
 
 
+## Punto de vista de desarrollo
+
+\imgn{1}{./img/development.png}
+
 ### Instalación y actualización
 
 El modelo de instalación para el sistema de recomendación de música debe constar de los siguientes elementos instalados en el siguiente orden:
@@ -137,3 +151,10 @@ Para la restauración del sistema se barajan dos posibilidades:
   * No dar servicio durante la caida del servidor, con la finalidad de disminuir el coste inicial del sistema.
 
 # Diseño arquitectonico
+El sistema se diseñará siguiendo una arquitectura por capas. Esta decisión se debe a que se pueden identificar claramente varias partes del sistema que pueden ser desarrolladas independientemente. El sistema consta de 3 capas:
+
+  * Interfaz de usuario: su labor es mostrar información al usuario y comunicarse con él. Esta capa se comunica con la capa de gestión de predicciones obteniendo los datos que deben ser mostrados.
+  * Gestor de predicciones: en esta capa se lleva a cabo la funcionalidad del sistema. Se comunica con la capa de gestión de datos.
+  * Gestor de datos: es la encargada de realizar lecturas y escrituras a la base de datos, así como de la obtención de datos de las distintas fuentes.
+  
+\imgn{0.5}{./img/capas.png}	
