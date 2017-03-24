@@ -49,15 +49,23 @@ El presupuesto se basa principalmente en el diagrama de despliegue. Asumiendo qu
     * Luz.
   * Personal/Mantenimiento.
 
+  |              |                                           |                           |                                            |                   |                                    |
+  |--------------|-------------------------------------------|---------------------------|--------------------------------------------|-------------------|------------------------------------|
+  |    Elementos    |    Desglose                                  | Coste inicial (€) (anual) | Coste inicial por usuario (€/pers) (anual) | Coste mensual (€) | Coste mensual por usuario (€/pers) | 
+  | Servidor     | CPU: Quad-Core                            | 308,99                    | 0,154495                                   | 25,74916       | 0,012874                        |
+  |              | RAM: 8-16 GB                              | 173,98                    | 0,08699                                    | 14,49833       | 0,007249                        |
+  |              | HDD Online: 1 TB                          | 84                        | 0,042                                      | 7                 | 0,0035                             |
+  |              | HDD OffLine 1 TB                          | 84                        | 0,084                                      | 7                 | 0,007                              |
+  |              | Refrigeración                             | 141,11                    | 0,070555                                   | 11,75916       | 0,005879                        |
+  |              | Otros elementos(cables, placa, cajas,...) | 599,92                    | 0,29996                                    | 49,9933      | 0,02499                        |
+  | Dominio      | Nombre de dominio                         | 8,84                      | 0,00442                                    | 0,73666     | 0,00036                        |
+  | Luz          | Fuente 500-600W                           | 630,14184                 | 0,315070                                 | 52,51182          | 0,02625                         |
+  | Servicio Red | Conexión a internet (ADSL) 300Mb - 1Gb    | 65,4                      | 0,0327                                     | 5,45              | 0,002725                           |
+  |              | IP fija                                   | 300                       | 0,15                                       | 25                | 0,0125                             |
+  | Réplica      |                                           | 1400,84                   | 0,70042                                    | 116,7366       | 0,058368                      |
+  | Total        |                                           | 3797,22184                | 1,94061                                 | 316,43515       | 0,161717                        |
 
-  | Elementos    | Desglose | Coste inicial | Coste inicial por usuario | coste mensual fijo |  Coste mensual por usuario |
-  |-----------------|--------------|--------------|--------------|-------------|-------------|
-  | Servidor | - CPU: Quad-Core <br> - RAM: 8-16 GB <br> - HDD Online: 20 GB <br> - HDD Offline: 30 GB <br> - Refrigeración | 1431.67 € | 14.3167 - 28.6324 € | 119.3058 € | 1.193058 - 2.3861 |
-  | Dominio | dominio .com (porkbun) | 8.84 € | 0.0884 - 0.1768 € | 0.7366 € | 0.01473 - 0.00736 €|
-  | Luz | | 180 - 360 € | 2.7 - 5.4 € | 15 - 30 € | 0.225 - 0.45 € |
-  | Mantenimiento |
-  | Personal |
-  | Total |
+
 
 ## Sistema basado en la nube
 
