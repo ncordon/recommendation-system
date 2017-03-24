@@ -1,0 +1,39 @@
+body {
+    background-color: #F6F6F6;
+}
+
+header {
+    background-color: #2B2B2B;
+	border-bottom: 4px solid #DE1B1B;
+}
+
+.customLi {
+    color: #F6F6F6;
+}
+
+.customLi:hover {
+    border-radius: 10px;
+    background-color: rgba(128, 128, 128, 0.66);
+}
+
+.customHeader {
+    color: #F6F6F6;
+    border: 2px solid #DE1B1B;
+    padding: 10px;
+    border-radius: 10px;
+		background-color: #DE1B1B;
+		border-bottom: 4px solid #F6F6F6;
+}
+
+.content {
+	background-color: rgba(167, 167, 167, 0.55);
+	margin: 5% 10% 5% 10%;
+	padding: 3%;
+	min-height: 30vh;
+}
+
+footer{
+	border-top: 4px solid rgba(43, 43, 43, 0.25);
+	background-color: rgba(167, 167, 167, 0.55);
+	padding: 3%;
+}

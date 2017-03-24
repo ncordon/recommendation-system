@@ -43,9 +43,9 @@ En nuestro punto de vista funcional reseñamos los siguientes elementos:
   - **Gestor de predicciones**: se ha pensado en este módulo como un elemento que sintentiza todos los grupos afines sugeridos para unos grupos modelo de entrada, escoge cuáles mostrarle al usuario y devuelve la respuesta al navegador web. Solicita al *gestor de datos* la información disponible para grupos afines a los introducidos por el usuario en el navegador web.
   - **Gestor de datos de grupos**: se encarga de acceder a los datos de grupos, y en caso de no existir o estar desactualizados, llama al *recolector de datos*. Caso opuesto devuelve la información al *gestor de predicciones*.
   - **Recolector de datos**: se encargar de acceder a los datos a través de las APIs o el *scrapeo* y los devuelve al gestor de datos de grupos para la actualización en la base de datos.
-  
+
 En nuestro caso se ha decidido separar en un único módulo funcional el acceso a la base de datos (escritura y lectura de información de grupos afines).  
-  
+
 \imgn{1}{./img/funcional.png}
 
 ## Punto de vista de concurrencia
@@ -131,47 +131,9 @@ La migración de datos es una operación más crítica en el caso de que deba re
 ### Backup y restauración del sistema
 El sistema realizará de forma programada copias de la base de datos y se almacenará en un disco duro no conectada a la red, cuya única finalidad es almacenar los datos fechados de cada copia de la base de datos. En caso de que sea necesario una restauración de la base de datos se podría realizar la misma técnica empleada en la migración pero en sentido opuesto.
 
-# Presupuesto
-El presupuesto se basa principalmente en el diagrama de despliegue. Asumiendo que el proyecto recibe el visto bueno y suponiendo que el sistema será capaz de atender al menos a 50-100 usuarios concurrentes en su inicio podemos definir los siguientes presupuestos:
+Para la restauración del sistema se barajan dos posibilidades:
 
-## Sistema "in House"
+  * La instalación de una réplica del servidor actual, para que en el caso de una posible desconexión del servidor principal, este entre en acción hasta la activación de este último.
+  * No dar servicio durante la caida del servidor, con la finalidad de disminuir el coste inicial del sistema.
 
-  * Hardware necesario:
-    * Servidor (hosting):
-      * CPU: Quad-Core
-      * RAM: 8-16 GB
-      * HDD Online: 20 GB
-      * HDD Offline: 30 GB
-      * Refrigeración
-  * Software necesario:
-    * Sistema servidor Linux (p.e. CentOS)
-    * Python y librerías.
-    * Dominio.
-  * Servicios:
-    * Luz.
-  * Personal/Mantenimiento.
-
-
-  | Elementos    | Desglose | Coste inicial | Coste inicial por usuario | coste mensual fijo |  Coste mensual por usuario |
-  |-----------------|--------------|--------------|--------------|-------------|-------------|
-  | Servidor | - CPU: Quad-Core <br> - RAM: 8-16 GB <br> - HDD Online: 20 GB <br> - HDD Offline: 30 GB <br> - Refrigeración | 1431.67 € | 14.3167 - 28.6324 € | 119,3058 € | 1,193058 - 2,3861 |
-  | Dominio | dominio .com (porkbun) | 8.84 € | 0.0884 - 0.1768 € | 0.7366 € | 0.01473 - 0.00736 €|
-  | Luz | | 180 - 360 € | 2.7 - 5.4 € | 15 - 30 € | 0.225 - 0.45 € |
-  | Mantenimiento |
-  | Personal |
-  | Total |
-  
-## Sistema basado en la nube
-    
-Estimación con AppEngine:
-
-* 1 instancia por mes
-  * 219 horas de cálculo CPU al mes (aprox 20 minutos cada hora).
-  * Memoria usada: 91.25 GB al mes.
-  * Disco usado: 30 GB al mes.
-  * 300 MB de tráfico saliente al mes.
-  * Almacenamiento cloud: 20 GB
-  
-Total: 44.20\$ al mes $\approx$ 41€ al mes.
-  
 # Diseño arquitectonico
