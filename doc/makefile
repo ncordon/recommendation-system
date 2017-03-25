@@ -10,3 +10,6 @@ all: $(DIAGRAMS) $(PDF)
 
 %.pdf: %.md	$(DIAGRAMS)
 	pandoc -V lang=spanish $< -o $@  --template default.latex -N
+
+clean:
+	rm -r $(PDF)
