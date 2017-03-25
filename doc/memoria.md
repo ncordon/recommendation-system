@@ -71,6 +71,9 @@ Hay varios estados por los que tiene que pasar el sistema:
 
 \imgn{1}{./img/concurrencia.png}
 
+## Punto de vista de desarrollo
+
+\imgn{1}{./img/development.png}
 
 ## Punto de vista de despliegue
 
@@ -114,11 +117,6 @@ En esta vista se describe como el sistema funciona, será administrado y manteni
   * Migración de funcionalidades y datos.
   * Backup y restauración del sistema.
 
-
-## Punto de vista de desarrollo
-
-\imgn{1}{./img/development.png}
-
 ### Instalación y actualización
 
 El modelo de instalación para el sistema de recomendación de música debe constar de los siguientes elementos instalados en el siguiente orden:
@@ -156,5 +154,5 @@ El sistema se diseñará siguiendo una arquitectura por capas. Esta decisión se
   * Interfaz de usuario: su labor es mostrar información al usuario y comunicarse con él. Esta capa se comunica con la capa de gestión de predicciones obteniendo los datos que deben ser mostrados.
   * Gestor de predicciones: en esta capa se lleva a cabo la funcionalidad del sistema. Se comunica con la capa de gestión de datos.
   * Gestor de datos: es la encargada de realizar lecturas y escrituras a la base de datos, así como de la obtención de datos de las distintas fuentes.
-  
-\imgn{0.5}{./img/capas.png}	
+
+\imgn{0.5}{./img/capas.png}
