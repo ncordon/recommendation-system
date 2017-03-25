@@ -120,16 +120,16 @@ En esta vista se describe como el sistema funciona, será administrado y manteni
 ### Instalación y actualización
 
 El modelo de instalación para el sistema de recomendación de música debe constar de los siguientes elementos instalados en el siguiente orden:
-  * Grupos de instalación:
-    * Python 2.7: Contiene todo el software necesario para desarrollar el sistema de recomendación, la instalación depende del sistema:
-      * Windows: Es necesario descargar e instalar el software a partir del archivo binario obtenido de la web oficial de python: https://www.python.org/downloads/windows/
-      * Mac OS X: Es necesario descargar e instalar el software a partir del archivo binario obtenido de la web oficial de python:
-      https://www.python.org/downloads/mac-osx/
-      * Linux/UNIX: Es necesario descargar e instalar a través de la terminal el software a partir de  los archivos obtenido de la web oficial de python:
-      https://www.python.org/downloads/source/
-    * Librería flask para python: Una vez instalado python la librería se instala ejecutando el comando "pip install flask".
-    * Base de datos: Google App engine trabaja directamente con una base de datos noSQL, tan solo sería necesario instalar el esquema de base de datos en el sistema.
-    * Librería Recomendadora: Se trata de la librería principal del sistema, se darán más detalles de instalación más adelante.
+
+  * Python 2.7: Contiene todo el software necesario para desarrollar el sistema de recomendación, la instalación depende del sistema:
+    * Windows: Es necesario descargar e instalar el software a partir del archivo binario obtenido de la web oficial de python: https://www.python.org/downloads/windows/
+    * Mac OS X: Es necesario descargar e instalar el software a partir del archivo binario obtenido de la web oficial de python:
+    https://www.python.org/downloads/mac-osx/
+    * Linux/UNIX: Es necesario descargar e instalar a través de la terminal el software a partir de  los archivos obtenido de la web oficial de python:
+    https://www.python.org/downloads/source/
+  * Librería flask para python: Una vez instalado python la librería se instala ejecutando el comando "pip install flask".
+  * Base de datos: Google App engine trabaja directamente con una base de datos noSQL, tan solo sería necesario instalar el esquema de base de datos en el sistema.
+  * Librería Recomendadora: Se trata de la librería principal del sistema, se darán más detalles de instalación más adelante.
 
 
 ### Migración del sistema y los datos
