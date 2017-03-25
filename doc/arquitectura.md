@@ -161,10 +161,12 @@ El sistema se diseñará siguiendo una arquitectura por capas. Esta decisión se
 
 ## Justificación - Arquitectura basada en capas
 
-La arquitectura basada en capas (https://en.wikipedia.org/wiki/Multitier_architecture) es una arquitectura cuyo objetivo primordial es la separación de la lógica funcional y de la lógica de diseño, el desarrollo del modelo puede llevarse a cabo en diversos niveles de forma que si se requiere modificar alguna parte del sistema, este no tiene que revisarse completamente, si no que solo se revisa la parte necesaria.
+La arquitectura basada en capas [https://en.wikipedia.org/wiki/Multitier_architecture](https://en.wikipedia.org/wiki/Multitier_architecture) es una arquitectura cuyo objetivo primordial es la separación de la lógica funcional y de la lógica de diseño. El desarrollo del modelo puede llevarse a cabo en diversos niveles de forma que si se requiere modificar alguna parte del sistema, este no tiene que revisarse completamente, sino que solo se revisa la parte necesaria.
 
-La selección de este modelo es debido a la clara diferenciación de las partes de nuestro sistema, no requerimos por ejemplo que varias partes de nuestro sistema interactúen con los datos, necesitamos un módulo que obtenga e integre los datos.
+La selección de este modelo es debido a la clara diferenciación de las partes de nuestro sistema. No requerimos por ejemplo que varias partes de nuestro sistema modifiquen los datos, necesitamos un único módulo que obtenga e integre los datos.
 
-Otro modelo considerado:
+Otros diseños considerados:
 
-  * Modelo no relacional: En principio se asemejaba mucho a la clase de sistema de información que queriamos desarrollar, pero consideramos que el uso de herramientas como map reduce para este sistema se excede con respecto al uso final del mismo.
+  * Modelo no relacional: en principio se asemejaba mucho a la clase de sistema de información que queriamos desarrollar, pero consideramos que el uso de herramientas como mapReduce para este sistema se excede con respecto al uso final del mismo.
+  * Modelo multidimensional: descartado debido a las limitaciones sobre el cálculo y ancho de banda impuestas por AppEngine. Se decide implementar la actualización de datos de manera que se realice bajo demanda por parte de la aplicación de los mismos, y se descarta emplear un procedimiento ETL que por ejemplo actualicase los datos disponibles en base de datos durante el periodo de menor uso del sistema.
+  * Flujo de datos: a pesar de ajustarse bastante bien al diseño de nuestro sistema, su menor capacidad de modularización en caso de querer ampliarse la aplicación ha sido un factor determinante para escoger el modelo de capas.
