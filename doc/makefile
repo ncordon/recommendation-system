@@ -1,7 +1,7 @@
 DIAGRAMS_FOLDER:=./diagramas
 DIAGRAMS:=$(patsubst $(DIAGRAMS_FOLDER)/%.dia, $(DIAGRAMS_FOLDER)/%.png, $(wildcard $(DIAGRAMS_FOLDER)/*.dia))
 
-PDF:=./memoria.pdf ./presupuesto.pdf
+PDF:=./arquitectura.pdf ./presupuesto.pdf
 
 all: $(DIAGRAMS) $(PDF)
 

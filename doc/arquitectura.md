@@ -124,7 +124,7 @@ En esta vista se describe como el sistema funciona, será administrado y manteni
 El modelo de instalación para el sistema de recomendación de música debe constar de los siguientes elementos instalados en el siguiente orden:
 
   * Python 2.7: Contiene todo el software necesario para desarrollar el sistema de recomendación, la instalación depende del sistema:
-    * Windows: Es necesario descargar e instalar el software a partir del archivo binario obtenido de la web oficial de python: [https://www.python.org/downloads/windows/](https://www.python.org/downloads/windows/) 
+    * Windows: Es necesario descargar e instalar el software a partir del archivo binario obtenido de la web oficial de python: [https://www.python.org/downloads/windows/](https://www.python.org/downloads/windows/)
     * Mac OS X: Es necesario descargar e instalar el software a partir del archivo binario obtenido de la web oficial de python:
     [https://www.python.org/downloads/mac-osx/](https://www.python.org/downloads/mac-osx/)
     * Linux/UNIX: Es necesario descargar e instalar a través de la terminal el software a partir de  los archivos obtenido de la web oficial de python:
@@ -158,3 +158,13 @@ El sistema se diseñará siguiendo una arquitectura por capas. Esta decisión se
   * **Gestor de datos**: es la encargada de realizar lecturas y escrituras a la base de datos, así como de la obtención de datos de las distintas fuentes.
 
 \imgn{0.5}{./img/capas.png}
+
+## Justificación - Arquitectura basada en capas
+
+La arquitectura basada en capas (https://en.wikipedia.org/wiki/Multitier_architecture) es una arquitectura cuyo objetivo primordial es la separación de la lógica funcional y de la lógica de diseño, el desarrollo del modelo puede llevarse a cabo en diversos niveles de forma que si se requiere modificar alguna parte del sistema, este no tiene que revisarse completamente, si no que solo se revisa la parte necesaria.
+
+La selección de este modelo es debido a la clara diferenciación de las partes de nuestro sistema, no requerimos por ejemplo que varias partes de nuestro sistema interactúen con los datos, necesitamos un módulo que obtenga e integre los datos.
+
+Otro modelo considerado:
+
+  * Modelo no relacional: En principio se asemejaba mucho a la clase de sistema de información que queriamos desarrollar, pero consideramos que el uso de herramientas como map reduce para este sistema se excede con respecto al uso final del mismo.
