@@ -67,9 +67,11 @@ Hay varios estados por los que tiene que pasar el sistema:
 - **Devuelve resultado**: en caso de que haya datos para los grupos modelo introducidos, se devuelve el resultado y llegamos al estado final.
 - **Actualización de grupos afines**: caso de que no existan datos, o lleven sin actualizarse un determinado tiempo, se recolectan los datos y se escriben en la base de datos, y se procede al estado *Devuelve resultado*.
 
-\imgn{1}{./img/concurrencia-estados.png}
+\imgn{0.7}{./img/concurrencia-estados.png}
 
-\imgn{1}{./img/concurrencia.png}
+Debería existir una actualización concurrente de los datos de grupos, caso de que no existan en el sistema o estén desactualizados. Hemos tratado de modelar esto en el siguiente diagrama:
+
+\imgn{0.9}{./img/concurrencia.png}
 
 ## Punto de vista de desarrollo
 
@@ -98,7 +100,7 @@ Se han considerado los siguientes nodos para el diagrama de despliegue:
     * **Almacenamiento offline:** Parte del sistema que se encarga de almacenar las copias de seguridad del sistema, para evitar pérdida de funcionalidad a la hora de una posible mala migración de datos o ataques al servidor.
   * Conexión de red.
 
-Si nos ponemos a pensar en los principales cuellos de botella de una aplicación web, estos son claramente los servidores y su actividad, por lo que es muy posible que el servidor que se encarga de la recomendación y el servidor web se integren en uno solo, ya que la interacción entre ellos debe ser rápida.
+Reflexionando sobre los principales cuellos de botella de una aplicación web, estos son claramente los servidores y su actividad, por lo que es muy posible que el servidor que se encarga de la recomendación y el servidor web se integren en uno solo, ya que la interacción entre ellos debe ser rápida.
 
 En el primer diagrama se considera el servidor recomendador de manera independiente del servidor web y en el segundo caso el servidor web tiene un módulo que realiza las tareas del recomendación, sin embargo estas agrupaciones pueden llegar a ser lógicas y los tres servidores pueden actuar en una única máquina en la que a cada servidor se le asigna una cantidad determinada de recursos físicos.
 
@@ -122,12 +124,12 @@ En esta vista se describe como el sistema funciona, será administrado y manteni
 El modelo de instalación para el sistema de recomendación de música debe constar de los siguientes elementos instalados en el siguiente orden:
 
   * Python 2.7: Contiene todo el software necesario para desarrollar el sistema de recomendación, la instalación depende del sistema:
-    * Windows: Es necesario descargar e instalar el software a partir del archivo binario obtenido de la web oficial de python: https://www.python.org/downloads/windows/
+    * Windows: Es necesario descargar e instalar el software a partir del archivo binario obtenido de la web oficial de python: [https://www.python.org/downloads/windows/](https://www.python.org/downloads/windows/) 
     * Mac OS X: Es necesario descargar e instalar el software a partir del archivo binario obtenido de la web oficial de python:
-    https://www.python.org/downloads/mac-osx/
+    [https://www.python.org/downloads/mac-osx/](https://www.python.org/downloads/mac-osx/)
     * Linux/UNIX: Es necesario descargar e instalar a través de la terminal el software a partir de  los archivos obtenido de la web oficial de python:
-    https://www.python.org/downloads/source/
-  * Librería flask para python: Una vez instalado python la librería se instala ejecutando el comando "pip install flask".
+    [https://www.python.org/downloads/source/](https://www.python.org/downloads/source/)
+  * Librería flask para python: Una vez instalado python la librería se instala ejecutando el comando `pip install flask`.
   * Base de datos: Google App engine trabaja directamente con una base de datos noSQL, tan solo sería necesario instalar el esquema de base de datos en el sistema.
   * Librería Recomendadora: Se trata de la librería principal del sistema, se darán más detalles de instalación más adelante.
 
@@ -136,7 +138,7 @@ El modelo de instalación para el sistema de recomendación de música debe cons
 
 La migración de las funcionalidades podrían realizarse de manera que la antigua versión del sistema se continúe ejecutando de forma paralela a la del sistema con las nuevas o mejoradas funcionalidades, esto ocurre hasta que este último este totalmente operativo entonces se para la ejecución del sistema anterior. Esto es debido a que en nuestro sistema no se realizan peticiones críticas que necesiten de constante rigor. Aunque también sería posible adoptar el modelo big bang, es decir reinicios programados cada cierto tiempo que reinicien las funcionalidades del sistema para aplicar las actualizaciones o añadir nuevas funcionalidades.
 
-La migración de datos es una operación más crítica en el caso de que deba realizarse durante el funcionamiento del sistema, en el caso del modelo big bang es tan sencillo como realizar una copia de la base de datos con el nombre deseado mientras que el sistema está apagado, estaría programado para que se realizara antes del inicio del sistema. En el caso de que la migración se produzca durante la ejecución del sistema se realiza creando una nueva base de datos, se extraen los datos actuales de la anterior base de datos y posteriormente se cargan en la nueva base de datos en el tiempo, se irán realizando las mismas operaciones en ambas bases de datos hasta que las dos llegan al punto en que son iguales y se continua con la nueva base de datos tal y como se refleja en el siguiente gráfico:
+La migración de datos es una operación más crítica en caso de que deba realizarse durante el funcionamiento del sistema, en el caso del modelo big bang es tan sencillo como realizar una copia de la base de datos con el nombre deseado mientras que el sistema está apagado, estaría programado para que se realizara antes del inicio del sistema. En el caso de que la migración se produzca durante la ejecución del sistema se realiza creando una nueva base de datos, se extraen los datos actuales de la anterior base de datos y posteriormente se cargan en la nueva base de datos en el tiempo, se irán realizando las mismas operaciones en ambas bases de datos hasta que las dos llegan al punto en que son iguales y se continua con la nueva base de datos tal y como se refleja en el siguiente gráfico:
 
 \imgn{0.5}{./img/migration.png}
 
@@ -151,8 +153,8 @@ Para la restauración del sistema se barajan dos posibilidades:
 # Diseño arquitectonico
 El sistema se diseñará siguiendo una arquitectura por capas. Esta decisión se debe a que se pueden identificar claramente varias partes del sistema que pueden ser desarrolladas independientemente. El sistema consta de 3 capas:
 
-  * Interfaz de usuario: su labor es mostrar información al usuario y comunicarse con él. Esta capa se comunica con la capa de gestión de predicciones obteniendo los datos que deben ser mostrados.
-  * Gestor de predicciones: en esta capa se lleva a cabo la funcionalidad del sistema. Se comunica con la capa de gestión de datos.
-  * Gestor de datos: es la encargada de realizar lecturas y escrituras a la base de datos, así como de la obtención de datos de las distintas fuentes.
+  * **Interfaz de usuario**: su labor es mostrar información al usuario y comunicarse con él. Esta capa se comunica con la capa de gestión de predicciones obteniendo los datos que deben ser mostrados.
+  * **Gestor de predicciones**: en esta capa se lleva a cabo la funcionalidad del sistema. Se comunica con la capa de gestión de datos.
+  * **Gestor de datos**: es la encargada de realizar lecturas y escrituras a la base de datos, así como de la obtención de datos de las distintas fuentes.
 
 \imgn{0.5}{./img/capas.png}
