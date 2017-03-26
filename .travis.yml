@@ -8,9 +8,9 @@ python:
 - 2.7
 
 install:
-- pip install -t lib flask
-# Adds secret URI to mlab db
-- sed -i /MONGO_URI/c\MONGO_URI=\"$MLAB_URI\" config.py
+  - pip install -t lib -r pip_requirements
+  # Adds secret URI to mlab db
+  - sed -i /MONGO_URI/c\MONGO_URI=\"$MLAB_URI\" config.py
 
 script: true
 
