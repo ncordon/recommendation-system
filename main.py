@@ -16,6 +16,7 @@
 # limitations under the License.
 
 from flask import *
+from google.appengine.ext import ndb
 
 app = Flask(__name__)
 
@@ -28,17 +29,13 @@ def about():
     return render_template("about.html")
 
 
-
-# @app.route("/bdtest")
-# def echo():
-# #     client = datastore.Client()
-# #     key = client.key('Task', 'sample_task')
-# #     return(client.get(key))
-#     class Account(ndb.Expando):
-#         pass
+@app.route("/bdtest")
+def echo():
+    class Account(ndb.Expando):
+        pass
     
-#     query = Account.query(ndb.GenericProperty('username')=='Sandy')
-#     return(query.get().email))
+    query = Account.query(ndb.GenericProperty('username')=='Sandy')
+    return(query.get().email)
 
 @app.errorhandler(404)
 def not_found(error):
