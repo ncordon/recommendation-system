@@ -8,3 +8,10 @@ handlers:
   
 - url: /.*
   script: main.app
+
+#libraries:
+#- name: google-cloud-datastore
+#  version: "latest"
+
+builtins:
+- remote_api: on

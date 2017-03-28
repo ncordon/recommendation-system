@@ -16,10 +16,6 @@
 # limitations under the License.
 
 from flask import *
-# Things to manage database
-from config import *
-import pymongo
-from pprint import pprint
 
 app = Flask(__name__)
 
@@ -31,17 +27,18 @@ def index():
 def about():
     return render_template("about.html")
 
-@app.route("/bdtest")
-def echo():
-    client = pymongo.MongoClient(MONGO_URI)
-    db = client.get_default_database()
-    grupos_db = db['grupos']
 
-    #Dato = {'name': 'Porcupine Tree', 'album': 'Voyage 34', 'origin': 'GB'}
-    #grupos.db.insert(Dato)
-    query = grupos_db.find({'name':'Porcupine Tree'})
 
-    return(str(query[0]))
+# @app.route("/bdtest")
+# def echo():
+# #     client = datastore.Client()
+# #     key = client.key('Task', 'sample_task')
+# #     return(client.get(key))
+#     class Account(ndb.Expando):
+#         pass
+    
+#     query = Account.query(ndb.GenericProperty('username')=='Sandy')
+#     return(query.get().email))
 
 @app.errorhandler(404)
 def not_found(error):
