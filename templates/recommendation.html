@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block title %}Recomendador{% endblock %}
+{% block body %}
+<article>
+  <fieldset>
+    <legend>Información para la recomendación</legend>
+    <form action="/recommend" method="post" name="Recomendacion">
+      <label for="nameField">Nombre:</label>
+      <input type = "text" name="name" value = "p.e: Juan" />
+      <br>
+      <br>
+      <label for="nameField">Introduce los tres grupos o artistas que más te gusten:</label>
+      <br>
+      <input type = "text" name="artist1" value = "p.e: Los Ramones" />
+      <br>
+      <input type = "text" name="artist2" value = "p.e: Gorillaz" />
+      <br>
+      <input type = "text" name="artist3" value = "p.e: Tears for fears" />
+      <br>
+      <input type = "submit" id=submitbutton value = "Enviar!!" />
+    </form>
+  </fieldset>
+  <h2>¿Cómo se lleva a cabo la recomendación?</h2>
+  <hr>
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean id auctor eros. Curabitur velit orci, faucibus ac lacus pretium, efficitur iaculis eros. Quisque vulputate in nisi eu vehicula. Vestibulum rutrum turpis risus, placerat viverra ex dignissim ut. Ut laoreet enim mauris, quis placerat nibh suscipit eu. Praesent erat tellus, egestas vel vestibulum in, pharetra non velit. Duis efficitur ante vitae ultricies sodales. Praesent venenatis lectus purus, eu condimentum justo ullamcorper eget. Curabitur iaculis facilisis nulla, et venenatis ante fermentum at. Quisque ligula ex, sodales at tellus ut, tincidunt ullamcorper tortor. Maecenas sodales sit amet enim quis pulvinar. Pellentesque in augue vel sem tristique lobortis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Morbi egestas commodo mi ac consectetur. Sed dapibus est sit amet mauris mollis efficitur. Duis dui risus, ultricies eget sodales ac, venenatis non justo.
+  </p>
+</article>
+{% endblock %}

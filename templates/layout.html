@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="./static/normalize.css">
     <link rel="stylesheet" href="https://unpkg.com/purecss@0.6.2/build/base-min.css">
     <link rel="stylesheet" href="https://unpkg.com/purecss@0.6.2/build/pure-min.css" integrity="sha384-UQiGfs9ICog+LwheBSRCt1o5cbyKIHbwjWscjemyBMT9YCUMZffs6UqUTd0hObXD" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/purecss@0.6.2/build/grids-responsive-min.css">
     <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css')}}">
     <meta name="Todos" content="Recomendador de música">
     <title>{% block title %}Recomendador de música{% endblock %}</title>  </head>
@@ -14,7 +15,7 @@
         <a href="/" class="pure-menu-heading"><h1 class="customHeader">Título</h1></a>
         <ul class="pure-menu-list">
           <li class="pure-menu-item"><a href="/" class="pure-menu-link customLi">Inicio</a></li>
-          <li class="pure-menu-item"><a href="#" class="pure-menu-link customLi">Recomendar</a></li>
+          <li class="pure-menu-item"><a href="/recommendation" class="pure-menu-link customLi">Recomendar</a></li>
           <li class="pure-menu-item"><a href="/about" class="pure-menu-link customLi">Acerca</a></li>
         </ul>
       </nav>
@@ -26,12 +27,12 @@
     <footer>
       <h4>Sistema de Recomendación - Ingeniería de sistemas de información.</h4>
       <div class="pure-g">
-        <div class="pure-u-1-2 footColumn">
+        <div class="pure-u-1 pure-u-sm-1-2 footColumn">
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean id auctor eros. Curabitur velit orci, faucibus ac lacus pretium, efficitur iaculis eros. Quisque vulputate in nisi eu vehicula. Vestibulum rutrum turpis risus, placerat viverra ex dignissim ut. Ut laoreet enim mauris, quis placerat nibh suscipit eu. Praesent erat tellus, egestas vel vestibulum in, pharetra non velit. Duis efficitur ante vitae ultricies sodales. Praesent venenatis lectus purus, eu condimentum justo ullamcorper eget.
           </p>
         </div>
-        <div class="pure-u-1-2 footColumn">
+        <div class="pure-u-1 pure-u-sm-1-2 footColumn">
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean id auctor eros. Curabitur velit orci, faucibus ac lacus pretium, efficitur iaculis eros. Quisque vulputate in nisi eu vehicula. Vestibulum rutrum turpis risus, placerat viverra ex dignissim ut. Ut laoreet enim mauris, quis placerat nibh suscipit eu. Praesent erat tellus, egestas vel vestibulum in, pharetra non velit. Duis efficitur ante vitae ultricies sodales. Praesent venenatis lectus purus, eu condimentum justo ullamcorper eget.
           </p>

@@ -28,12 +28,20 @@ def index():
 def about():
     return render_template("about.html")
 
+@app.route("/recommendation")
+def recommendation():
+    return render_template("recommendation.html")
+
+@app.route("/recommend", methods = ["POST","GET"])
+def recommend():
+    result = request.form
+    return render_template("table.html",result = result)
 
 @app.route("/bdtest")
 def echo():
     class Account(ndb.Expando):
         pass
-    
+
     query = Account.query(ndb.GenericProperty('username')=='Sandy')
     return(query.get().email)
 
@@ -43,4 +51,3 @@ def not_found(error):
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', threaded=True)
-

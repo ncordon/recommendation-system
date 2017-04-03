@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block title %}Info{% endblock %}
+{% block body %}
+<article>
+  <h2>Información obtenida del formulario</h2>
+  <hr>
+    {% for key, value in result.iteritems() %}
+
+    <p><strong>{{ key }}</strong>, {{ value }}</p>
+
+    {% endfor %}
+</article>
+{% endblock %}
