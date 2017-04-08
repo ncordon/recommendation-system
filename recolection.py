@@ -17,16 +17,25 @@ class spotifyData:
         self.spotyfy = spotipy.Spotify(client_credentials_manager=self.client_credentials_manager)
         self.spotyfy.trace=False
 
+    '''
+    Método para obtener la información de un artista por el nombre.
+    '''
     def getArtistByName(self, name, n):
         results = self.spotyfy.search(q = name, limit = n, type = "artist")
         artists = results['artists']['items']
         return artists[0]
 
+    '''
+    Método para obtener la información de un album por el nombre.
+    '''
     def getAlbumByName(self, name, n):
         results = self.spotyfy.search(q = name, limit = n, type = "album")
         albums = results['album']['items']
         return albums[0]
 
+    '''
+    Método para obtener la información de los albumes de un artista por el nombre.
+    '''
     def getAlbumsByArtist(self, artist, n):
         albums = []
         results = self.spotyfy.artist_albums(self.getArtistByName(artist, n)['id'], album_type='album')
@@ -37,6 +46,9 @@ class spotifyData:
         albums.sort(key=lambda album:album['name'].lower())
         return albums
 
+    '''
+    Método para obtener la información de los caciones de un album.
+    '''
     def albumTracks(self, album):
         tracks = []
         results = self.spotyfy.album_tracks(album['id'])
@@ -46,6 +58,9 @@ class spotifyData:
             tracks.extend(results['items'])
         return tracks
 
+    '''
+    Método para obtener recomendaciones a partir de un artista por el nombre.
+    '''
     def recommendationByArtist(self, name, n):
         albums = []
         results = self.spotyfy.recommendations(seed_artists = [self.getArtistByName(name, n)['id']])
@@ -54,6 +69,9 @@ class spotifyData:
     def categories(self):
         print self.spotyfy.categories()
 
+    '''
+    Método para obtener recomendaciones en forma de árbol a partir del nombre de un artista.
+    '''
     def spiderOfRecommendations(self, name, li, i, n, limitlen):
         localli = []
         if i == n:
@@ -75,6 +93,10 @@ class spotifyData:
             else:
                 for j in range(limitlen):
                     self.spiderOfRecommendations(localli[j], li, i, n, limitlen)
+
+'''
+Ejemplos
+'''
 
 if __name__ == '__main__':
     data = spotifyData()
