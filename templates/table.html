@@ -4,9 +4,9 @@
 <article>
   <h2>Información obtenida del formulario</h2>
   <hr>
-    {% for key, value in result.iteritems() %}
+    {% for artist in recommendations %}
 
-    <p><strong>{{ key }}</strong>, {{ value }}</p>
+    <p>{{ artist }}</p>
 
     {% endfor %}
 </article>

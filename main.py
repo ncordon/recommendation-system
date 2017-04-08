@@ -17,8 +17,10 @@
 
 from flask import *
 from google.appengine.ext import ndb
+from recolection import *
 
 app = Flask(__name__)
+data = spotifyData()
 
 @app.route("/")
 def index():
@@ -35,7 +37,16 @@ def recommendation():
 @app.route("/recommend", methods = ["POST","GET"])
 def recommend():
     result = request.form
-    return render_template("table.html",result = result)
+    recommendations = []
+
+    for key, value in result.iteritems():
+        if key != 'name':
+            localRecommendations = []
+            data.spiderOfRecommendations(value, localRecommendations, 1, 2, 2)
+            recommendations = list(set().union(recommendations,localRecommendations))
+            print localRecommendations
+
+    return render_template("table.html", recommendations = recommendations)
 
 @app.route("/bdtest")
 def echo():
@@ -44,6 +55,7 @@ def echo():
 
     query = Account.query(ndb.GenericProperty('username')=='Sandy')
     return(query.get().email)
+    return
 
 @app.errorhandler(404)
 def not_found(error):
