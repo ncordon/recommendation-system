@@ -13,15 +13,19 @@ from spotipy.oauth2 import SpotifyClientCredentials
 class spotifyData:
 
     def __init__(self):
-        #self.client_credentials_manager = SpotifyClientCredentials()
-        #self.spotyfy = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-        #self.spotyfy.trace=False
-        self.spotyfy = spotipy.Spotify()
+        self.client_credentials_manager = SpotifyClientCredentials(client_id ="", client_secret ="")
+        self.spotyfy = spotipy.Spotify(client_credentials_manager=self.client_credentials_manager)
+        self.spotyfy.trace=False
 
     def getArtistByName(self, name, n):
         results = self.spotyfy.search(q = name, limit = n, type = "artist")
         artists = results['artists']['items']
         return artists[0]
+
+    def getAlbumByName(self, name, n):
+        results = self.spotyfy.search(q = name, limit = n, type = "album")
+        albums = results['album']['items']
+        return albums[0]
 
     def getAlbumsByArtist(self, artist, n):
         albums = []
@@ -45,25 +49,57 @@ class spotifyData:
     def recommendationByArtist(self, name, n):
         albums = []
         results = self.spotyfy.recommendations(seed_artists = [self.getArtistByName(name, n)['id']])
-        for track in results['tracks']:
-            print track['name'], '-', track['artists'][0]['name']
+        return results
 
     def categories(self):
         print self.spotyfy.categories()
 
-    def getTrackByGenre(self, genre, n):
-        return
+    def spiderOfRecommendations(self, name, li, i, n, limitlen):
+        localli = []
+        if i == n:
+            results = self.recommendationByArtist(name,1)
+            for track in results['tracks']:
+                if track['artists'][0]['name'] not in li:
+                    li.insert(0,track['artists'][0]['name'])
+            return
+        else:
+            results = self.recommendationByArtist(name,1)
+            for track in results['tracks']:
+                if track['artists'][0]['name'] not in li:
+                    li.insert(0,track['artists'][0]['name'])
+                    localli.insert(0,track['artists'][0]['name'])
+            i += 1
+            if limitlen == -1:
+                for j in range(len(localli)):
+                    self.spiderOfRecommendations(localli[j], li, i, n, limitlen)
+            else:
+                for j in range(limitlen):
+                    self.spiderOfRecommendations(localli[j], li, i, n, limitlen)
 
-data = spotifyData()
-albums = data.getAlbumsByArtist('gorillaz', 2)
+if __name__ == '__main__':
+    data = spotifyData()
+    albums = data.getAlbumsByArtist('gorillaz', 2)
 
-data.categories()
+    #data.categories()
 
-for album in albums:
-    print "--------------------ALBUM--------------------"
-    print album['name']
-    tracks = data.albumTracks(album)
-    print "--------------------TRACKS--------------------"
-    for track in tracks:
-        print track['name']
-#data.recommendationByArtist("gorillaz", 1)
+    '''for album in albums:
+        print "--------------------ALBUM--------------------"
+        print album['name']
+        tracks = data.albumTracks(album)
+        print "--------------------TRACKS--------------------"
+        for track in tracks:
+            print track['name']
+            '''
+    #print()
+    '''
+    results = data.recommendationByArtist("gorillaz", 1)
+    for track in results['tracks']:
+        print track['artists'][0]['name']
+    print "--------------------2--------------------"
+    results = data.recommendationByArtist("Daft Punk", 1)
+    for track in results['tracks']:
+        print track['artists'][0]['name']
+        '''
+    lista = []
+    data.spiderOfRecommendations("gorillaz", lista, 1, 2, 3)
+    print lista
