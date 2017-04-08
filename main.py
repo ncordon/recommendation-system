@@ -17,6 +17,8 @@
 
 from flask import *
 from google.appengine.ext import ndb
+from requests_toolbelt.adapters import appengine
+appengine.monkeypatch()
 from recolection import *
 
 app = Flask(__name__)
@@ -55,7 +57,6 @@ def echo():
 
     query = Account.query(ndb.GenericProperty('username')=='Sandy')
     return(query.get().email)
-    return
 
 @app.errorhandler(404)
 def not_found(error):
