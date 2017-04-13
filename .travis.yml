@@ -11,9 +11,9 @@ python:
 
 install:
   - pip install -t lib -r pip_requirements
-  # Adds secret URI to mlab db
-  - sed -i /MONGO_URI/c\MONGO_URI=\"$MLAB_URI\" config.py
-
+  - envsubst < app.yaml > temp.yaml
+  - mv temp.yaml app.yaml
+  
 script: true
 
 deploy:
@@ -27,6 +27,3 @@ deploy:
 notifications:
   email: false
 
-env:
-  global:
-    secure: z/GPcnO8tLbf0+k+GiEOgYh3rBYAtLvQLb9HNJrktgRs4Njnp7AYQpq3m+okLqMHSkAf+k/NlXmo/zR233VAxchOhraSAqbzx8XoEnbVl0d2++u8hUq8HBJFmEwyAw8rnB/lQvHXPnjiuDc13YGeQ5xX0cq/qu0tF1NfsxsLnPvjKogOPJo9iKxec9xbEUXD5MWwgbMc72Q+ell1/7zzc/ULrmn9Ws399RF0KyVUcRR1dgt3bf12x6TFhmHq/YT4kHBLfUmO7aJWUoD8IK0RdRAuKHyYWS3wOE65lSuODspfkNyc/hoZZYxLAcNQc1PKVCQ7cWp9Odjru+rlSuuCq3GWKqR2JIVAl/ypqqXO/LM3KATHRSaPy7v4nVedu7f2qhLSX/d2EI8w/Zxv+/pyeG2W/bptFKBoL4ZiQSTaEccd64vl+ly8Gw+jnrHdYvlNeqF73u2UjrINz6WqrlITMD24/WJgVHRpBNcXW1Hio1T3e1uK8lCoidmNCzoCrZ/2ov9iK/E1ZQ36m52g9j00rICDAi7F4C2wNYusUg8Ze/GMnzJVi1nimGAMvFBOFFnmzs55Fm7of2WZKZBWbouTYnE7fXc2RoL4dPyVvZJklqB1FaO7hHwF8z5u24aYTCvff4X8qsnOpE5VLIJXXHS528BuTyCBMoRa9Wx7BuYYtro=

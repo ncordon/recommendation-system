@@ -92,5 +92,7 @@ ENV/
 # Client-secret for AppEngine without encryption
 secret.json
 
+# App yaml containing secrets
+app.yaml
 
 *.autosave

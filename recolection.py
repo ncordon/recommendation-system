@@ -13,7 +13,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 class spotifyData:
 
     def __init__(self):
-        self.client_credentials_manager = SpotifyClientCredentials(client_id ="", client_secret ="")
+        self.client_credentials_manager = SpotifyClientCredentials()
         self.spotyfy = spotipy.Spotify(client_credentials_manager=self.client_credentials_manager)
         self.spotyfy.trace=False
 
