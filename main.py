@@ -32,19 +32,20 @@ def index():
 def about():
     return render_template("about.html")
 
-@app.route("/recommendation")
+@app.route("/ask-recommendation")
 def recommendation():
-    return render_template("recommendation.html")
+    return render_template("ask-recommendation.html")
 
-@app.route("/recommend", methods = ["POST","GET"])
+@app.route("/answer-recommendation", methods = ["POST","GET"])
 def recommend():
     result = request.form
     recommendations = []
-
+    data = spotifyData()
+    
     for key, value in result.iteritems():
         if key != 'name':
             localRecommendations = []
-            data.spiderOfRecommendations(value, localRecommendations, 1, 2, 2)
+            data.spiderOfRecommendations(value, localRecommendations, 1, 1, 2)
             recommendations = list(set().union(recommendations,localRecommendations))
             print localRecommendations
 
