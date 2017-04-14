@@ -14,7 +14,10 @@ install:
   - envsubst < app.yaml > temp.yaml
   - mv temp.yaml app.yaml
   
-script: true
+script:
+  - FILE_TO_FIX=lib/spotipy/oauth2.py
+  - sed -i "s/if response.status_code is not 200:/if response.status_code != 200:/" $FILE_TO_FIX
+  - python -m py_compile $FILE_TO_FIX
 
 deploy:
   provider: gae

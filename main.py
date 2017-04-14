@@ -17,8 +17,7 @@
 
 from flask import *
 from google.appengine.ext import ndb
-from requests_toolbelt.adapters import appengine
-appengine.monkeypatch()
+import requests
 from recolection import *
 
 app = Flask(__name__)
