@@ -7,7 +7,12 @@ Librería para la recolección de datos a través de las API de Spotify y youtub
 
 import spotipy
 import spotipy.util as util
+import re
+
 from spotipy.oauth2 import SpotifyClientCredentials
+from apiclient.discovery import build
+from apiclient.errors import HttpError
+from oauth2client.tools import argparser
 
 
 class spotifyData:
@@ -94,6 +99,37 @@ class spotifyData:
                 for j in range(limitlen):
                     self.spiderOfRecommendations(localli[j], li, i, n, limitlen)
 
+
+
+
+class youtubeData:
+
+	def __init__(self):
+		DEVELOPER_KEY =""
+		YOUTUBE_API_SERVICE_NAME = "youtube"
+		YOUTUBE_API_VERSION = "v3"
+		self.youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
+    				developerKey=DEVELOPER_KEY)
+		
+	#Metodo para obtener el id de los videos y el nombre del canal VEVO
+	def youtube_search(self,query,max_results):
+  
+		search_response = self.youtube.search().list(q=query,part="id,snippet",maxResults=max_results).execute()
+		
+		videos = []
+  		channels = []
+  		channel_name = re.compile(r'\b\w+VEVO\b')
+ 
+  		for search_result in search_response.get("items", []):
+    			if search_result["id"]["kind"] == "youtube#video":
+      				videos.append("%s" % (search_result["id"]["videoId"]))
+    			elif search_result["id"]["kind"] == "youtube#channel":
+				if channel_name.match(search_result["snippet"]["title"]):
+      					channels.append("%s" % (search_result["snippet"]["title"]))
+		
+		return videos[0]
+
+
 '''
 Ejemplos
 '''
@@ -125,3 +161,7 @@ if __name__ == '__main__':
     lista = []
     data.spiderOfRecommendations("gorillaz", lista, 1, 2, 3)
     print lista
+
+    yt= youtubeData()
+    result = yt.youtube_search("drake",5)
+    print result
