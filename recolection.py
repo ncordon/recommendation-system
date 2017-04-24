@@ -5,6 +5,7 @@
 Librería para la recolección de datos a través de las API de Spotify y youtube
 '''
 
+import os
 import spotipy
 import spotipy.util as util
 import re
@@ -18,7 +19,7 @@ from oauth2client.tools import argparser
 class spotifyData:
 
     def __init__(self):
-        self.client_credentials_manager = SpotifyClientCredentials()
+        self.client_credentials_manager = SpotifyClientCredentials(client_id = os.environ.get("SPOTIPY_CLIENT_ID"), client_secret = os.environ.get("SPOTIPY_CLIENT_SECRET"))
         self.spotyfy = spotipy.Spotify(client_credentials_manager=self.client_credentials_manager)
         self.spotyfy.trace=False
 
@@ -105,28 +106,28 @@ class spotifyData:
 class youtubeData:
 
 	def __init__(self):
-		DEVELOPER_KEY =""
+		DEVELOPER_KEY = os.environ.get("YOUTUBE_DEV_KEY")
 		YOUTUBE_API_SERVICE_NAME = "youtube"
 		YOUTUBE_API_VERSION = "v3"
 		self.youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
     				developerKey=DEVELOPER_KEY)
-		
+
 	#Metodo para obtener el id de los videos y el nombre del canal VEVO
 	def youtube_search(self,query,max_results):
-  
+
 		search_response = self.youtube.search().list(q=query,part="id,snippet",maxResults=max_results).execute()
-		
+
 		videos = []
   		channels = []
   		channel_name = re.compile(r'\b\w+VEVO\b')
- 
+
   		for search_result in search_response.get("items", []):
     			if search_result["id"]["kind"] == "youtube#video":
       				videos.append("%s" % (search_result["id"]["videoId"]))
     			elif search_result["id"]["kind"] == "youtube#channel":
 				if channel_name.match(search_result["snippet"]["title"]):
       					channels.append("%s" % (search_result["snippet"]["title"]))
-		
+
 		return videos[0]
 
 
@@ -136,7 +137,9 @@ Ejemplos
 
 if __name__ == '__main__':
     data = spotifyData()
-    albums = data.getAlbumsByArtist('gorillaz', 2)
+    artist = data.getArtistByName("gorillaz",1)
+
+    #albums = data.getAlbumsByArtist('gorillaz', 2)
 
     #data.categories()
 
@@ -158,10 +161,12 @@ if __name__ == '__main__':
     for track in results['tracks']:
         print track['artists'][0]['name']
         '''
-    lista = []
-    data.spiderOfRecommendations("gorillaz", lista, 1, 2, 3)
-    print lista
+    #lista = []
+    #data.spiderOfRecommendations("gorillaz", lista, 1, 2, 3)
+    #print lista
 
+    '''
     yt= youtubeData()
     result = yt.youtube_search("drake",5)
     print result
+    '''

@@ -19,6 +19,7 @@ from flask import *
 from google.appengine.ext import ndb
 import requests
 from recolection import *
+from datastore import *
 
 app = Flask(__name__)
 data = spotifyData()
@@ -39,8 +40,7 @@ def recommendation():
 def recommend():
     result = request.form
     recommendations = []
-    data = spotifyData()
-    
+
     for key, value in result.iteritems():
         if key != 'name':
             localRecommendations = []
@@ -52,11 +52,14 @@ def recommend():
 
 @app.route("/bdtest")
 def echo():
-    class Account(ndb.Expando):
-        pass
+    query = group.query(ndb.GenericProperty('name')=='Sandy')
+    print query
+    return(query.get().genre)
 
-    query = Account.query(ndb.GenericProperty('username')=='Sandy')
-    return(query.get().email)
+@app.route("/bdtest2")
+def echo2():
+    store = DataStore()
+    store.integrate_data(data,"gorillaz")
 
 @app.errorhandler(404)
 def not_found(error):
