@@ -60,6 +60,8 @@ def echo():
 def echo2():
     store = DataStore()
     store.integrate_data(data,"gorillaz")
+    return("FUNCIONA!!")
+
 
 @app.errorhandler(404)
 def not_found(error):

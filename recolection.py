@@ -4,8 +4,6 @@
 '''
 Librería para la recolección de datos a través de las API de Spotify y youtube
 '''
-
-import os
 import spotipy
 import spotipy.util as util
 import re
@@ -19,7 +17,7 @@ from oauth2client.tools import argparser
 class spotifyData:
 
     def __init__(self):
-        self.client_credentials_manager = SpotifyClientCredentials(client_id = os.environ.get("SPOTIPY_CLIENT_ID"), client_secret = os.environ.get("SPOTIPY_CLIENT_SECRET"))
+        self.client_credentials_manager = SpotifyClientCredentials()
         self.spotyfy = spotipy.Spotify(client_credentials_manager=self.client_credentials_manager)
         self.spotyfy.trace=False
 
