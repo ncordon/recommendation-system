@@ -29,7 +29,7 @@ class DataStore:
         albums = spotyfy_data.getAlbumsByArtist(group, 1)
         for album in albums:
             album_key = self.create_album(str(album["name"]), "UNKNOW", 0, 0000, album["external_urls"]["spotify"], int(artist_key))
-            tracks = data.albumTracks(album)
+            tracks = spotyfy_data.albumTracks(album)
             for track in tracks:
                 self.create_song(track["name"], float(track["duration_ms"]), 0, track["external_urls"]["spotify"], int(album_key), bool(track["explicit"]))
 
