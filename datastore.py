@@ -10,13 +10,13 @@ class DataStore:
         group_key = group.put()
         return group_key.id()
 
-    def create_song(self, name, duration, score, album_key):
-        song = Song(name = name, duration = duration, score = score, album_key = album_key)
+    def create_song(self, name, duration, score, spotify_url, album_key, explicit):
+        song = Song(name = name, duration = duration, score = score, album_key = album_key, spotify_url = spotify_url, explicit = explicit)
         song_key = song.put()
         return song_key.id()
 
     def create_album(self, name, genre, score, year, spotify_url, group_key):
-        album = Album(name = name, duration = duration, score = score, year = year, group_key = group_key, spotify_url = spotify_url)
+        album = Album(name = name, genre = genre, score = score, year = year, group_key = group_key, spotify_url = spotify_url)
         album_key = album.put()
         return album_key.id()
 
@@ -28,22 +28,10 @@ class DataStore:
         #Continuamos obteniendo todos los datos posibles de spotify de los albumes asociados al grupo anterior
         albums = spotyfy_data.getAlbumsByArtist(group, 1)
         for album in albums:
-            self.create_album(str(album["name"]), "UNKNOW", 0, 0000, album["external_urls"]["spotify"], int(artist_key))
-
-        '''
-        for album in albums:
-            print album["name"]
-            print album["external_urls"]["spotify"]
+            album_key = self.create_album(str(album["name"]), "UNKNOW", 0, 0000, album["external_urls"]["spotify"], int(artist_key))
             tracks = data.albumTracks(album)
             for track in tracks:
-                print track
-                print track["name"]
-                print track["external_urls"]["spotify"]
-                print track["explicit"]
-                print track["duration_ms"]
-        '''
-
-
+                self.create_song(track["name"], float(track["duration_ms"]), 0, track["external_urls"]["spotify"], int(album_key), bool(track["explicit"]))
 
 class Group(ndb.Model):
     name = ndb.StringProperty()
@@ -55,10 +43,6 @@ class Group(ndb.Model):
     spotify_url = ndb.StringProperty()
     spotify_followers = ndb.IntegerProperty()
 
-def create_entity_using_keyword_arguments():
-    sandy = Group(name='Sandy', score=123, genre='HIPHOP')
-    sandy.put()
-
 class Album(ndb.Model):
     name = ndb.StringProperty()
     genre = ndb.StringProperty()
@@ -66,7 +50,6 @@ class Album(ndb.Model):
     year = ndb.IntegerProperty()
     group_key = ndb.IntegerProperty()
     spotify_url = ndb.StringProperty()
-
 
 class Song(ndb.Model):
     name = ndb.StringProperty()
