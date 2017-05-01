@@ -23,7 +23,7 @@ from datastore import *
 
 app = Flask(__name__)
 data = spotifyData()
-
+youtube_data = youtubeData()
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -59,7 +59,7 @@ def echo():
 @app.route("/bdtest2")
 def echo2():
     store = DataStore()
-    store.integrate_data(data,"gorillaz")
+    store.integrate_data(data,youtube_data,"gorillaz")
     return("FUNCIONA!!")
 
 

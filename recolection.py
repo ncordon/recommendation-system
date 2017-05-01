@@ -7,7 +7,7 @@ Librería para la recolección de datos a través de las API de Spotify y youtub
 import spotipy
 import spotipy.util as util
 import re
-
+import os
 from spotipy.oauth2 import SpotifyClientCredentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -110,25 +110,36 @@ class youtubeData:
 		self.youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
     				developerKey=DEVELOPER_KEY)
 
-	#Metodo para obtener el id de los videos y el nombre del canal VEVO
-	def youtube_search(self,query,max_results):
+   
+    #Metodo para obtener el id de los videos
+	def search_channel(self,query,max_results=5):
+
+		search_response = self.youtube.search().list(q=query,part="id",maxResults=max_results).execute()
+
+		channels = []
+  		
+  		for search_result in search_response.get("items", []):
+    			if search_result["id"]["kind"] == "youtube#channel":
+      				videos.append("%s" % (search_result["id"]["channelId"]))
+                    
+		return channels[0]
+    
+    
+    #Metodo para obtener el id de los videos
+	def search_video(self,query,max_results=5):
 
 		search_response = self.youtube.search().list(q=query,part="id,snippet",maxResults=max_results).execute()
 
 		videos = []
-  		channels = []
-  		channel_name = re.compile(r'\b\w+VEVO\b')
-
+  		
   		for search_result in search_response.get("items", []):
     			if search_result["id"]["kind"] == "youtube#video":
       				videos.append("%s" % (search_result["id"]["videoId"]))
-    			elif search_result["id"]["kind"] == "youtube#channel":
-				if channel_name.match(search_result["snippet"]["title"]):
-      					channels.append("%s" % (search_result["snippet"]["title"]))
-
+                    
 		return videos[0]
-
-
+    
+   
+    
 '''
 Ejemplos
 '''
