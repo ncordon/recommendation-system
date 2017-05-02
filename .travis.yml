@@ -23,7 +23,7 @@ deploy:
   provider: gae
   keyfile: secret.json
   project: recommendation-system-160616
-  version: 1
+  version: 2
   on: master
   skip_cleanup: true
 

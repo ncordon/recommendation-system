@@ -37,3 +37,15 @@ former_members_tags = members[1].xpath('td//a')
 
 actual_members = [ m.text_content() for m in actual_members_tags ]
 former_members = [ m.text_content() for m in former_members_tags ]
+
+
+
+#####################################################
+# Scraps albums of the group
+#####################################################
+albums_tree = overview_tree.xpath('//table[@class="tbl release-group-list"]//tbody')
+albums = []
+
+for category in albums_tree:
+    albums += [ (a.getchildren()[0].text_content(), a.getchildren()[1].text_content())
+                for a in category.getchildren() ]
