@@ -49,3 +49,12 @@ albums = []
 for category in albums_tree:
     albums += [ (a.getchildren()[0].text_content(), a.getchildren()[1].text_content())
                 for a in category.getchildren() ]
+
+
+#####################################################
+# Scraps tags for the group
+#####################################################
+tags_page = requests.get(artist_url + '/tags')
+tags_tree = html.fromstring(tags_page.content)
+tags = [ t[0][0].text_content() for t in
+         tags_tree.xpath('//div[@id="all-tags"]')[0][0].getchildren() ]
