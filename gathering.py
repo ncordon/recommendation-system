@@ -14,7 +14,7 @@ from googleapiclient.errors import HttpError
 from oauth2client.tools import argparser
 
 
-class spotifyData:
+class spotifyDataHandler:
 
     def __init__(self):
         self.client_credentials_manager = SpotifyClientCredentials()
@@ -42,7 +42,8 @@ class spotifyData:
     '''
     def getAlbumsByArtist(self, artist, n):
         albums = []
-        results = self.spotyfy.artist_albums(self.getArtistByName(artist, n)['id'], album_type='album')
+        results = self.spotyfy.artist_albums(self.getArtistByName(artist, n)['id'],
+                                             album_type='album')
         albums.extend(results['items'])
         while results['next']:
             results = self.spotyfy.next(results)
@@ -101,51 +102,56 @@ class spotifyData:
 
 
 
-class youtubeData:
+class youtubeDataHandler:
 
-	def __init__(self):
-		DEVELOPER_KEY = os.environ.get("YOUTUBE_DEV_KEY")
-		YOUTUBE_API_SERVICE_NAME = "youtube"
-		YOUTUBE_API_VERSION = "v3"
-		self.youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
-    				developerKey=DEVELOPER_KEY)
+    def __init__(self):
+        DEVELOPER_KEY = os.environ.get("YOUTUBE_DEV_KEY")
+        YOUTUBE_API_SERVICE_NAME = "youtube"
+        YOUTUBE_API_VERSION = "v3"
+        self.youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
+                             developerKey=DEVELOPER_KEY)
 
    
     #Metodo para obtener el id de los videos
-	def search_channel(self,query,max_results=5):
+    def search_channel(self,query,max_results=5):
 
-		search_response = self.youtube.search().list(q=query,part="id",maxResults=max_results).execute()
+        search_response = self.youtube.search().list(q=query,part="id",
+                                                     maxResults=max_results).execute()
 
-		channels = []
-  		
-  		for search_result in search_response.get("items", []):
-    			if search_result["id"]["kind"] == "youtube#channel":
-      				videos.append("%s" % (search_result["id"]["channelId"]))
-                    
-		return channels[0]
-    
+        channels = []
+                
+        for search_result in search_response.get("items", []):
+            if search_result["id"]["kind"] == "youtube#channel":
+                videos.append("%s" % (search_result["id"]["channelId"]))
+                
+        return channels[0]
+            
     
     #Metodo para obtener el id de los videos
-	def search_video(self,query,max_results=5):
+    def search_video(self,query,max_results=5):
 
-		search_response = self.youtube.search().list(q=query,part="id,snippet",maxResults=max_results).execute()
+        search_response = self.youtube.search().list(q=query, part="id,snippet",
+                                                         maxResults=max_results).execute()
 
-		videos = []
-  		
-  		for search_result in search_response.get("items", []):
-    			if search_result["id"]["kind"] == "youtube#video":
-      				videos.append("%s" % (search_result["id"]["videoId"]))
-                    
-		return videos[0]
-    
+        videos = []
+                
+        for search_result in search_response.get("items", []):
+            if search_result["id"]["kind"] == "youtube#video":
+                videos.append("%s" % (search_result["id"]["videoId"]))
+                
+        return videos[0]
+            
    
     
+spotify_handler = spotifyDataHandler()
+youtube_handler = youtubeDataHandler()
+
 '''
 Ejemplos
 '''
 
 if __name__ == '__main__':
-    data = spotifyData()
+    data = spotifyDataHandler()
     artist = data.getArtistByName("gorillaz",1)
 
     #albums = data.getAlbumsByArtist('gorillaz', 2)

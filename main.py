@@ -18,12 +18,10 @@
 from flask import *
 from google.appengine.ext import ndb
 import requests
-from recolection import *
 from datastore import *
 
 app = Flask(__name__)
-data = spotifyData()
-youtube_data = youtubeData()
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -44,7 +42,7 @@ def recommend():
     for key, value in result.iteritems():
         if key != 'name':
             localRecommendations = []
-            data.spiderOfRecommendations(value, localRecommendations, 1, 1, 2)
+            spotify_handler.spiderOfRecommendations(value, localRecommendations, 1, 1, 2)
             recommendations = list(set().union(recommendations,localRecommendations))
             print localRecommendations
 
@@ -58,8 +56,7 @@ def echo():
 
 @app.route("/bdtest2")
 def echo2():
-    store = DataStore()
-    store.integrate_data(data,youtube_data,"gorillaz")
+    data_handler.get_data_for("gorillaz")
     return("FUNCIONA!!")
 
 
