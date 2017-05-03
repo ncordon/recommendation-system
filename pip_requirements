@@ -1,4 +1,5 @@
 flask==0.12
 spotipy==2.4.4
 requests==2.1.0
+lxml=3.7.3
 google-api-python-client==1.6.2

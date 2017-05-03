@@ -11,8 +11,9 @@ import os
 from spotipy.oauth2 import SpotifyClientCredentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from oauth2client.tools import argparser
-
+#from oauth2client.tools import argparse
+# from lxml import html
+# import requests
 
 class spotifyDataHandler:
 
@@ -141,7 +142,74 @@ class youtubeDataHandler:
                 
         return videos[0]
             
-   
+
+
+
+# class musicbrainzHandler:
+#     def __init__(self, group_name):
+#         self.group_name = group_name
+#         # Calcula el nombre concatenando partes separadas por espacio por un +
+#         formatted_name="+".join(group_name.split())
+#         base_page = 'https://musicbrainz.org'
+#         results_page = requests.get('search?query=' + formatted_name + '&type=artist')
+#         # Extrae url del primer resultado al buscar en musicbrainz el nombre del grupo
+#         base_tree = html.fromstring(results_page.content)
+#         first_result = base_tree.xpath('//table[@class="tbl"]')[0].xpath('//tbody//tr//td//a')[0].values()[0]
+#         # artist_url almacena la página del priemr resultado
+#         self.artist_url = base_page + first_result
+
+#     """Scrapea la descripción del grupo"""
+#     def get_description():
+#         overview_page = requests.get(artist_url)
+#         overview_tree = html.fromstring(overview_page.content)
+#         description = overview_tree.xpath('//div[@class="wikipedia-extract-body wikipedia-extract-collapse"]')
+#         description = description[0].text_content()
+
+#         return description
+
+
+#     """Scrapea miembros actuales del grupo"""
+#     def get_members():
+#         rel_page = requests.get(artist_url + '/relationships')
+#         rel_tree = html.fromstring(rel_page.content)
+#         members = rel_tree.xpath('//table[@class="details"]')[0]
+#         actual_members_tags = members[0].xpath('td//a')
+
+#         actual_members = [ m.text_content() for m in actual_members_tags ]
+#         return actual_members
+
+    
+#     """Scrapea miembros antiguos del grupo"""
+#     def get_former_members():
+#         rel_page = requests.get(artist_url + '/relationships')
+#         rel_tree = html.fromstring(rel_page.content)
+#         members = rel_tree.xpath('//table[@class="details"]')[0]
+#         former_members_tags = members[1].xpath('td//a')
+
+#         former_members = [ m.text_content() for m in former_members_tags ]
+#         return former_members
+
+#     """Scrapea lista de álbumes del grupo"""
+#     def get_albums():
+#         albums_tree = overview_tree.xpath('//table[@class="tbl release-group-list"]//tbody')
+#         albums = []
+
+#         for category in albums_tree:
+#             albums += [ (a.getchildren()[0].text_content(), a.getchildren()[1].text_content())
+#                         for a in category.getchildren() ]
+
+#         return albums
+
+#     """Scrapea tags para el grupo"""
+#     def get_tags():
+#         tags_page = requests.get(artist_url + '/tags')
+#         tags_tree = html.fromstring(tags_page.content)
+#         tags = [ t[0][0].text_content() for t in
+#                  tags_tree.xpath('//div[@id="all-tags"]')[0][0].getchildren() ]
+
+#         return tags
+
+    
     
 spotify_handler = spotifyDataHandler()
 youtube_handler = youtubeDataHandler()
