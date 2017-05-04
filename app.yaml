@@ -12,7 +12,9 @@ handlers:
 libraries:
 - name: ssl
   version: latest
-
+- name: lxml
+  version: 2.3.5
+  
 env_variables:
   SPOTIPY_CLIENT_ID: ${SPOTIPY_CLIENT_ID}
   SPOTIPY_CLIENT_SECRET: ${SPOTIPY_CLIENT_SECRET}
