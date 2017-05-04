@@ -40,21 +40,30 @@ class DataStore:
 
     """
     Obtiene datos para el grupo pasado como argumento,
-    usando las APIs de spotify y youtube
+    usando las APIs de spotify y youtube y scrapeando
+    datos desde musicbrainz
     """
     def get_data_for(self, group_name):
-
-        #Empezemos obteniendo los datos aportados por spotify de un grupo
+        musicbrainz_handler = musicbrainzHandler(group_name)
+        # Obtenemos los datos aportados por spotify de un grupo
         artist = spotify_handler.getArtistByName(group_name,1)
+
+        ###################################
+        # Esta parte no está funcionando
         #Buscamos su canal de youtube
         youtube_channel=''
         #youtube_channel = youtube_handler.search_channel(artist["name"])
+        ###################################
+        
         artist_key = self.create_group(artist["name"], str(artist["genres"]),
                                        int(artist["popularity"]), "UNKNOWN", 0000,
                                        artist["external_urls"]["spotify"],
                                        int(artist["followers"]["total"]),youtube_channel)
         #Obtenemos todos los datos posibles de spotify de los albumes asociados al grupo anterior
         albums = spotify_handler.getAlbumsByArtist(group_name, 1)
+        description = musicbrainz_handler.get_description()
+
+        
         for album in albums:
             video_id = youtube_handler.search_video(album["name"])
             album_key = self.create_album(str(album["name"]), "UNKNOWN", 0, 0000,

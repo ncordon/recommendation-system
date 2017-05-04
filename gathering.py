@@ -150,7 +150,7 @@ class musicbrainzHandler:
         # Calcula el nombre concatenando partes separadas por espacio por un +
         formatted_name="+".join(group_name.split())
         base_page = 'https://musicbrainz.org'
-        results_page = requests.get('search?query=' + formatted_name + '&type=artist')
+        results_page = requests.get(base_page + '/search?query=' + formatted_name + '&type=artist')
         # Extrae url del primer resultado al buscar en musicbrainz el nombre del grupo
         base_tree = html.fromstring(results_page.content)
         first_result = base_tree.xpath('//table[@class="tbl"]')[0].xpath('//tbody//tr//td//a')[0].values()[0]
@@ -158,8 +158,8 @@ class musicbrainzHandler:
         self.artist_url = base_page + first_result
 
     """Scrapea la descripción del grupo"""
-    def get_description():
-        overview_page = requests.get(artist_url)
+    def get_description(self):
+        overview_page = requests.get(self.artist_url)
         overview_tree = html.fromstring(overview_page.content)
         description = overview_tree.xpath('//div[@class="wikipedia-extract-body wikipedia-extract-collapse"]')
         description = description[0].text_content()
@@ -168,28 +168,38 @@ class musicbrainzHandler:
 
 
     """Scrapea miembros actuales del grupo"""
-    def get_members():
-        rel_page = requests.get(artist_url + '/relationships')
+    def get_members(self):
+        rel_page = requests.get(self.artist_url + '/relationships')
         rel_tree = html.fromstring(rel_page.content)
         members = rel_tree.xpath('//table[@class="details"]')[0]
-        actual_members_tags = members[0].xpath('td//a')
+        actual_members = []
 
-        actual_members = [ m.text_content() for m in actual_members_tags ]
+        try:
+            actual_members_tags = members[0].xpath('td//a//bdi')
+            actual_members = [ m.text_content() for m in actual_members_tags ]
+        except IndexError:
+            pass
+
         return actual_members
 
     
     """Scrapea miembros antiguos del grupo"""
-    def get_former_members():
-        rel_page = requests.get(artist_url + '/relationships')
+    def get_former_members(self):
+        rel_page = requests.get(self.artist_url + '/relationships')
         rel_tree = html.fromstring(rel_page.content)
         members = rel_tree.xpath('//table[@class="details"]')[0]
-        former_members_tags = members[1].xpath('td//a')
+        former_members = []
 
-        former_members = [ m.text_content() for m in former_members_tags ]
+        try:
+            former_members_tags = members[1].xpath('td//a//bdi')
+            former_members = [ m.text_content() for m in former_members_tags ]
+        except IndexError:
+            pass
+
         return former_members
 
     """Scrapea lista de álbumes del grupo"""
-    def get_albums():
+    def get_albums(self):
         albums_tree = overview_tree.xpath('//table[@class="tbl release-group-list"]//tbody')
         albums = []
 
@@ -200,7 +210,7 @@ class musicbrainzHandler:
         return albums
 
     """Scrapea tags para el grupo"""
-    def get_tags():
+    def get_tags(self):
         tags_page = requests.get(artist_url + '/tags')
         tags_tree = html.fromstring(tags_page.content)
         tags = [ t[0][0].text_content() for t in
