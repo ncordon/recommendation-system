@@ -9,11 +9,14 @@ class DataStore:
     Crea un grupo en base de datos con los parámetros pasados
     Devuelve la key del grupo creado
     """
-    def create_group(self, name, genre, score, area, begin_year,
-                     spotify_url, spotify_followers,youtube_channel):
-        group = Group(name = name, genre = genre, score = score,
-                      begin_year = begin_year, area = area, spotify_url = spotify_url,
-                      spotify_followers = spotify_followers, youtube_channel=youtube_channel)
+    def create_group(self, name, description, genre, actual_members, former_members,
+                     score, area, begin_year, spotify_url, spotify_followers,
+                     youtube_channel, tags):
+        group = Group(name = name, description = description, genre = genre,
+                      actual_members = actual_members, former_members = former_members,
+                      score = score, begin_year = begin_year, area = area,
+                      spotify_url = spotify_url, spotify_followers = spotify_followers,
+                      youtube_channel = youtube_channel, tags = tags)
         group_key = group.put()
         return group_key.id()
 
@@ -54,15 +57,21 @@ class DataStore:
         youtube_channel=''
         #youtube_channel = youtube_handler.search_channel(artist["name"])
         ###################################
+
+        description = musicbrainz_handler.get_description()
+        actual_members = musicbrainz_handler.get_actual_members()
+        former_members = musicbrainz_handler.get_former_members()
+        tags = musicbrainz_handler.get_tags()
         
-        artist_key = self.create_group(artist["name"], str(artist["genres"]),
+        artist_key = self.create_group(artist["name"], description, str(artist["genres"]),
+                                       actual_members, former_members,
                                        int(artist["popularity"]), "UNKNOWN", 0000,
                                        artist["external_urls"]["spotify"],
-                                       int(artist["followers"]["total"]),youtube_channel)
+                                       int(artist["followers"]["total"]),
+                                       youtube_channel, tags)
         #Obtenemos todos los datos posibles de spotify de los albumes asociados al grupo anterior
         albums = spotify_handler.getAlbumsByArtist(group_name, 1)
-        description = musicbrainz_handler.get_description()
-
+        
         
         for album in albums:
             video_id = youtube_handler.search_video(album["name"])
@@ -76,17 +85,17 @@ class DataStore:
 
 class Group(ndb.Model):
     name = ndb.StringProperty()
+    description = ndb.TextProperty()
     genre = ndb.StringProperty()
-    description = ndb.StringProperty()
-    members = ndb.JsonProperty()
-    former_members = ndb.JsonProperty()
+    actual_members = ndb.StringProperty( repeated = True )
+    former_members = ndb.StringProperty( repeated = True )
     score = ndb.IntegerProperty()
     area = ndb.StringProperty()
     begin_year = ndb.IntegerProperty()
     spotify_url = ndb.StringProperty()
     spotify_followers = ndb.IntegerProperty()
     youtube_channel = ndb.StringProperty()
-    tags = ndb.JsonProperty()
+    tags = ndb.StringProperty( repeated = True )
     
 class Album(ndb.Model):
     name = ndb.StringProperty()

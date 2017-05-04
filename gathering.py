@@ -150,72 +150,91 @@ class musicbrainzHandler:
         # Calcula el nombre concatenando partes separadas por espacio por un +
         formatted_name="+".join(group_name.split())
         base_page = 'https://musicbrainz.org'
-        results_page = requests.get(base_page + '/search?query=' + formatted_name + '&type=artist')
+        results_page = requests.get(base_page + '/search?query=' + formatted_name + '&type=artist',
+                                    timeout = None)
         # Extrae url del primer resultado al buscar en musicbrainz el nombre del grupo
         base_tree = html.fromstring(results_page.content)
-        first_result = base_tree.xpath('//table[@class="tbl"]')[0].xpath('//tbody//tr//td//a')[0].values()[0]
+        first_result = base_tree.xpath(
+            '//table[@class="tbl"]')[0].xpath('//tbody//tr//td//a')[0].values()[0]
         # artist_url almacena la página del priemr resultado
         self.artist_url = base_page + first_result
 
+        
+        # Obtiene el árbol html de la pestaña Overview, Relationships y Tags
+        overview_page = requests.get(self.artist_url, timeout = None)
+        self.overview = html.fromstring(overview_page.content)
+        rel_page = requests.get(self.artist_url + '/relationships', timeout = None)
+        self.relationships = html.fromstring(rel_page.content)
+        tags_page = requests.get(self.artist_url + '/tags', timeout = None)
+        self.tags = html.fromstring(tags_page.content)
+
+        
     """Scrapea la descripción del grupo"""
     def get_description(self):
-        overview_page = requests.get(self.artist_url)
-        overview_tree = html.fromstring(overview_page.content)
-        description = overview_tree.xpath('//div[@class="wikipedia-extract-body wikipedia-extract-collapse"]')
-        description = description[0].text_content()
-
+        description = ""
+        try:
+            description = self.overview.xpath(
+                '//div[@class="wikipedia-extract-body wikipedia-extract-collapse"]'
+            )[0].text_content()
+        except Exception:
+            pass
+        
         return description
 
 
-    """Scrapea miembros actuales del grupo"""
-    def get_members(self):
-        rel_page = requests.get(self.artist_url + '/relationships')
-        rel_tree = html.fromstring(rel_page.content)
-        members = rel_tree.xpath('//table[@class="details"]')[0]
-        actual_members = []
+    def __get_members(self, actual):
+        if(actual):
+            index = 0
+        else:
+            index = 1
+
+        member_list = []
 
         try:
-            actual_members_tags = members[0].xpath('td//a//bdi')
-            actual_members = [ m.text_content() for m in actual_members_tags ]
+            members = self.relationships.xpath('//table[@class="details"]')[0]
+            member_tags = members[index].xpath('td//a//bdi')
+            member_list = [ m.text_content() for m in member_tags ]
         except IndexError:
             pass
 
-        return actual_members
+        return member_list
 
     
+    """Scrapea miembros actuales del grupo"""
+    def get_actual_members(self):
+        return (self.__get_members(True))
+
+        
     """Scrapea miembros antiguos del grupo"""
     def get_former_members(self):
-        rel_page = requests.get(self.artist_url + '/relationships')
-        rel_tree = html.fromstring(rel_page.content)
-        members = rel_tree.xpath('//table[@class="details"]')[0]
-        former_members = []
+        return (self.__get_members(False))
 
-        try:
-            former_members_tags = members[1].xpath('td//a//bdi')
-            former_members = [ m.text_content() for m in former_members_tags ]
-        except IndexError:
-            pass
-
-        return former_members
 
     """Scrapea lista de álbumes del grupo"""
     def get_albums(self):
-        albums_tree = overview_tree.xpath('//table[@class="tbl release-group-list"]//tbody')
         albums = []
 
-        for category in albums_tree:
-            albums += [ (a.getchildren()[0].text_content(), a.getchildren()[1].text_content())
-                        for a in category.getchildren() ]
-
+        try:
+            albums_tree = self.overview.xpath('//table[@class="tbl release-group-list"]//tbody')
+            for category in albums_tree:
+                albums += [ (a.getchildren()[0].text_content(), a.getchildren()[1].text_content())
+                            for a in category.getchildren() ]
+        except Exception:
+            pass
+        
         return albums
 
+    
     """Scrapea tags para el grupo"""
     def get_tags(self):
-        tags_page = requests.get(artist_url + '/tags')
-        tags_tree = html.fromstring(tags_page.content)
-        tags = [ t[0][0].text_content() for t in
-                 tags_tree.xpath('//div[@id="all-tags"]')[0][0].getchildren() ]
+        tags = []
 
+        try:
+            tags = [ t[0][0].text_content() for t in
+                     self.tags.xpath('//div[@id="all-tags"]')[0][0].getchildren() ]
+        except Exception:
+            pass
+        
         return tags
 
     
