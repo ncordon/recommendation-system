@@ -48,11 +48,10 @@ def recommend():
 
     return render_template("table.html", recommendations = recommendations)
 
-@app.route("/bdtest")
-def echo():
-    query = group.query(ndb.GenericProperty('name')=='Sandy')
-    print query
-    return(query.get().genre)
+@app.route("/<groupname>")
+def echo(groupname):
+    data_handler.get_data_for(groupname)
+    return render_template("artist.html")
 
 @app.route("/bdtest2")
 def echo2():
