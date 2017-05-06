@@ -18,7 +18,7 @@
 from flask import *
 from google.appengine.ext import ndb
 import requests
-from datastore import *
+from recommender import *
 
 app = Flask(__name__)
 
@@ -48,10 +48,13 @@ def recommend():
 
     return render_template("table.html", recommendations = recommendations)
 
-@app.route("/<groupname>")
-def echo(groupname):
-    data_handler.get_data_for(groupname)
-    return render_template("artist.html")
+@app.route("/<group_name>")
+def echo(group_name):
+    # Normalize group name. If we query for example Porcupine Tree, the HTTP petition gets done
+    # with "Porcupine%20Tree"
+    group_name = group_name.replace("%20", " ")
+    result = data_handler.retrieve_data_for(group_name)
+    return render_template("artist.html", result = result)
 
 @app.route("/bdtest2")
 def echo2():

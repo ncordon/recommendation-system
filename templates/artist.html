@@ -1,6 +1,9 @@
 {% extends "layout.html" %}
-{% block title %}Información acerca del grupo{% endblock %}
 {% block body %}
-  <h2>Aquí información sobre el grupo</h2>
-  <hr>
+{% block title %}Grupos{% endblock %}
+<ul>
+  {% for artist in result %}
+    <li> {{ artist.name }} </li>
+  {% endfor %}
+</ul>
 {% endblock %}

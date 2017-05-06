@@ -42,6 +42,22 @@ class DataStore:
 
 
     """
+    Devuelve datos para el grupo pasado como argumento.
+    Si no existe en base de datos, lo crea con get_data_for 
+    y lo devuelve
+    """
+    def retrieve_data_for(self, group_name):
+        query = Group.query(Group.name == group_name)
+
+        if query.count() == 0:
+            key = self.get_data_for(group_name)
+            query = Group.query(Group.name == group_name)
+        
+
+        return query
+        
+        
+    """
     Obtiene datos para el grupo pasado como argumento,
     usando las APIs de spotify y youtube y scrapeando
     datos desde musicbrainz
@@ -83,8 +99,12 @@ class DataStore:
                                  track["external_urls"]["spotify"], int(album_key),
                                  bool(track["explicit"]))
 
+
+        
+
+
 class Group(ndb.Model):
-    name = ndb.StringProperty()
+    name = ndb.StringProperty( required = True )
     description = ndb.TextProperty()
     genre = ndb.StringProperty()
     actual_members = ndb.StringProperty( repeated = True )
@@ -95,10 +115,11 @@ class Group(ndb.Model):
     spotify_url = ndb.StringProperty()
     spotify_followers = ndb.IntegerProperty()
     youtube_channel = ndb.StringProperty()
+    similar_groups = ndb.KeyProperty( repeated = True, indexed = True )
     tags = ndb.StringProperty( repeated = True )
     
 class Album(ndb.Model):
-    name = ndb.StringProperty()
+    name = ndb.StringProperty( required = True )
     genre = ndb.StringProperty()
     score = ndb.IntegerProperty()
     year = ndb.IntegerProperty()

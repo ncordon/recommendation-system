@@ -18,22 +18,28 @@ class spotifyDataHandler:
 
     def __init__(self):
         self.client_credentials_manager = SpotifyClientCredentials()
-        self.spotyfy = spotipy.Spotify(client_credentials_manager=self.client_credentials_manager)
-        self.spotyfy.trace=False
+        self.spotify = spotipy.Spotify(client_credentials_manager=self.client_credentials_manager)
+        self.spotify.trace=False
 
     '''
     Método para obtener la información de un artista por el nombre.
     '''
     def getArtistByName(self, name, n):
-        results = self.spotyfy.search(q = name, limit = n, type = "artist")
-        artists = results['artists']['items']
-        return artists[0]
+        results = self.spotify.search(q = name, limit = n, type = "artist")
+        artist = {}
+
+        try:
+            artist = results['artists']['items'][0]
+        except Exception:
+            pass
+
+        return artist
 
     '''
     Método para obtener la información de un album por el nombre.
     '''
     def getAlbumByName(self, name, n):
-        results = self.spotyfy.search(q = name, limit = n, type = "album")
+        results = self.spotify.search(q = name, limit = n, type = "album")
         albums = results['album']['items']
         return albums[0]
 
@@ -42,11 +48,11 @@ class spotifyDataHandler:
     '''
     def getAlbumsByArtist(self, artist, n):
         albums = []
-        results = self.spotyfy.artist_albums(self.getArtistByName(artist, n)['id'],
+        results = self.spotify.artist_albums(self.getArtistByName(artist, n)['id'],
                                              album_type='album')
         albums.extend(results['items'])
         while results['next']:
-            results = self.spotyfy.next(results)
+            results = self.spotify.next(results)
             albums.extend(results['items'])
         albums.sort(key=lambda album:album['name'].lower())
         return albums
@@ -56,10 +62,10 @@ class spotifyDataHandler:
     '''
     def albumTracks(self, album):
         tracks = []
-        results = self.spotyfy.album_tracks(album['id'])
+        results = self.spotify.album_tracks(album['id'])
         tracks.extend(results['items'])
         while results['next']:
-            results = self.spotyfy.next(results)
+            results = self.spotify.next(results)
             tracks.extend(results['items'])
         return tracks
 
@@ -68,11 +74,11 @@ class spotifyDataHandler:
     '''
     def recommendationByArtist(self, name, n):
         albums = []
-        results = self.spotyfy.recommendations(seed_artists = [self.getArtistByName(name, n)['id']])
+        results = self.spotify.recommendations(seed_artists = [self.getArtistByName(name, n)['id']])
         return results
 
     def categories(self):
-        print self.spotyfy.categories()
+        print self.spotify.categories()
 
     '''
     Método para obtener recomendaciones en forma de árbol a partir del nombre de un artista.
