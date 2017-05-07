@@ -60,6 +60,20 @@ form input {
   color: black;
 }
 
+.avatar {
+  text-align: center;
+}
+
+.avatar img{
+  border-radius: 100%;
+	transition: all 0.5s ease 0s;
+	border: 2px solid black;
+}
+
+.avatar img:hover{
+	filter: saturate(10%);
+}
+
 footer{
   border-top: 4px solid rgba(43, 43, 43, 0.25);
   background-color: rgba(167, 167, 167, 0.55);
@@ -100,6 +114,20 @@ footer{
     margin: 5% 10% 5% 10%;
     padding: 3%;
     min-height: 30vh;
+  }
+
+  .avatar {
+    text-align: center;
+  }
+
+  .avatar img{
+    border-radius: 100%;
+  	transition: all 0.5s ease 0s;
+  	border: 2px solid black;
+  }
+
+  .avatar img:hover{
+  	filter: saturate(10%);
   }
 
   footer{
