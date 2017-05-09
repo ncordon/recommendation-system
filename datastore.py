@@ -55,7 +55,16 @@ class DataStore:
         
 
         return query
-        
+    
+    """
+    Devuelve los albums asociados al grupo pasado como argumento.
+    Dicho grupo se supone que existe en la base de datos.
+    """
+    def getAlbums(self,group_name):
+        query = Group.query(Group.name == group_name)
+        for artist in query:
+            albums = Album.query(Album.group_key == artist.key.id())
+        return albums
         
     """
     Obtiene datos para el grupo pasado como argumento,

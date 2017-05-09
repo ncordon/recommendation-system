@@ -52,8 +52,9 @@ def echo(group_name):
     # with "Porcupine%20Tree"
     group_name = group_name.replace("%20", " ")
     result = data_handler.retrieve_data_for(group_name)
-    return render_template("artist.html", result = result)
-
+    albums = data_handler.getAlbums(group_name)
+    #print albums
+    return render_template("artist.html", result = result,albums = albums)
 @app.route("/bdtest2")
 def echo2():
     data_handler.get_data_for("gorillaz")
