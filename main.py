@@ -41,10 +41,8 @@ def recommend():
 
     for key, value in result.iteritems():
         if key != 'name':
-            localRecommendations = []
-            spotify_handler.spiderOfRecommendations(value, localRecommendations, 1, 1, 2)
-            recommendations = list(set().union(recommendations,localRecommendations))
-            print localRecommendations
+            local_recommendations = spotify_handler.spiderOfRecommendations(value, 10)
+            recommendations = list(set().union(recommendations,local_recommendations))
 
     return render_template("table.html", recommendations = recommendations)
 

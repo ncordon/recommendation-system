@@ -13,6 +13,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from lxml import html
 import requests
+from Queue import *
 
 class spotifyDataHandler:
 
@@ -104,30 +105,27 @@ class spotifyDataHandler:
     '''
     Método para obtener recomendaciones en forma de árbol a partir del nombre de un artista.
     '''
-    def spiderOfRecommendations(self, name, li, i, n, limitlen):
-        localli = []
-        if i == n:
-            results = self.recommendationByArtist(name,1)
-            for track in results['tracks']:
-                if track['artists'][0]['name'] not in li:
-                    li.insert(0,track['artists'][0]['name'])
-            return
-        else:
-            results = self.recommendationByArtist(name,1)
-            for track in results['tracks']:
-                if track['artists'][0]['name'] not in li:
-                    li.insert(0,track['artists'][0]['name'])
-                    localli.insert(0,track['artists'][0]['name'])
-            i += 1
-            if limitlen == -1:
-                for j in range(len(localli)):
-                    self.spiderOfRecommendations(localli[j], li, i, n, limitlen)
+    def spiderOfRecommendations(self, name, limitlen):
+        result = []
+        recommend_queue = Queue()
+        recommend_queue.put(name)
+        finished = False
+
+        while len(result) < limitlen and not finished and recommend_queue:
+            recommended = self.recommendationByArtist( recommend_queue.get() )
+            
+            if recommended:
+                recommended = set([track['artists'][0]['name'] for track in recommended['tracks']])
+                recommended = recommended - set(result)
+                result += list(recommended)
+
+                for group in recommended:
+                    recommend_queue.put(group)
             else:
-                for j in range(limitlen):
-                    self.spiderOfRecommendations(localli[j], li, i, n, limitlen)
+                finished = True
 
-
-
+        result = result[:limitlen]
+        return result
 
 class youtubeDataHandler:
 
