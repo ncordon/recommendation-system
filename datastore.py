@@ -65,7 +65,7 @@ class DataStore:
     def get_data_for(self, group_name):
         musicbrainz_handler = musicbrainzHandler(group_name)
         # Obtenemos los datos aportados por spotify de un grupo
-        artist = spotify_handler.getArtistByName(group_name,1)
+        artist = spotify_handler.getArtistByName(group_name)
 
         ###################################
         # Esta parte no está funcionando
@@ -86,7 +86,7 @@ class DataStore:
                                        int(artist["followers"]["total"]),
                                        youtube_channel, tags)
         #Obtenemos todos los datos posibles de spotify de los albumes asociados al grupo anterior
-        albums = spotify_handler.getAlbumsByArtist(group_name, 1)
+        albums = spotify_handler.getAlbumsByArtist(group_name)
         
         
         for album in albums:

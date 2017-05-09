@@ -24,8 +24,8 @@ class spotifyDataHandler:
     '''
     Método para obtener la información de un artista por el nombre.
     '''
-    def getArtistByName(self, name, n):
-        results = self.spotify.search(q = name, limit = n, type = "artist")
+    def getArtistByName(self, name):
+        results = self.spotify.search(q = name, limit = 1, type = "artist")
         artist = {}
 
         try:
@@ -38,23 +38,35 @@ class spotifyDataHandler:
     '''
     Método para obtener la información de un album por el nombre.
     '''
-    def getAlbumByName(self, name, n):
-        results = self.spotify.search(q = name, limit = n, type = "album")
-        albums = results['album']['items']
+    def getAlbumByName(self, name):
+        results = self.spotify.search(q = name, limit = 1, type = "album")
+        albums = {}
+
+        try:
+            albums = results['albums']['items']
+        except Exception:
+            pass
+        
         return albums[0]
 
     '''
     Método para obtener la información de los albumes de un artista por el nombre.
     '''
-    def getAlbumsByArtist(self, artist, n):
+    def getAlbumsByArtist(self, artist):
         albums = []
-        results = self.spotify.artist_albums(self.getArtistByName(artist, n)['id'],
+
+        try:
+            results = self.spotify.artist_albums(self.getArtistByName(artist)['id'],
                                              album_type='album')
-        albums.extend(results['items'])
-        while results['next']:
-            results = self.spotify.next(results)
             albums.extend(results['items'])
-        albums.sort(key=lambda album:album['name'].lower())
+            while results['next']:
+                results = self.spotify.next(results)
+                albums.extend(results['items'])
+
+            albums.sort(key=lambda album:album['name'].lower())
+        except Exception:
+            pass
+        
         return albums
 
     '''
@@ -62,24 +74,33 @@ class spotifyDataHandler:
     '''
     def albumTracks(self, album):
         tracks = []
-        results = self.spotify.album_tracks(album['id'])
-        tracks.extend(results['items'])
-        while results['next']:
-            results = self.spotify.next(results)
+
+        try:
+            results = self.spotify.album_tracks(album['id'])
             tracks.extend(results['items'])
+
+            while results['next']:
+                results = self.spotify.next(results)
+                tracks.extend(results['items'])
+        except Exception:
+            pass
         return tracks
 
     '''
     Método para obtener recomendaciones a partir de un artista por el nombre.
     '''
-    def recommendationByArtist(self, name, n):
+    def recommendationByArtist(self, name):
         albums = []
-        results = self.spotify.recommendations(seed_artists = [self.getArtistByName(name, n)['id']])
+
+        try:
+            results = self.spotify.recommendations(seed_artists =
+                                                   [self.getArtistByName(name)['id']])
+        except Exception:
+            pass
+        
         return results
 
-    def categories(self):
-        print self.spotify.categories()
-
+    
     '''
     Método para obtener recomendaciones en forma de árbol a partir del nombre de un artista.
     '''
