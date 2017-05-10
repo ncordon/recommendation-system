@@ -19,13 +19,13 @@ class spotifyDataHandler:
 
     def __init__(self):
         self.client_credentials_manager = SpotifyClientCredentials()
-        self.spotify = spotipy.Spotify(client_credentials_manager=self.client_credentials_manager)
-        self.spotify.trace=False
+        self.spotify = spotipy.Spotify(client_credentials_manager = self.client_credentials_manager)
+        self.spotify.trace = False
 
     '''
     Método para obtener la información de un artista por el nombre.
     '''
-    def getArtistByName(self, name):
+    def get_artist_by_name(self, name):
         results = self.spotify.search(q = name, limit = 1, type = "artist")
         artist = {}
 
@@ -39,7 +39,7 @@ class spotifyDataHandler:
     '''
     Método para obtener la información de un album por el nombre.
     '''
-    def getAlbumByName(self, name):
+    def get_album_by_name(self, name):
         results = self.spotify.search(q = name, limit = 1, type = "album")
         albums = {}
 
@@ -53,11 +53,11 @@ class spotifyDataHandler:
     '''
     Método para obtener la información de los albumes de un artista por el nombre.
     '''
-    def getAlbumsByArtist(self, artist):
+    def get_albums_by_artist(self, artist):
         albums = []
 
         try:
-            results = self.spotify.artist_albums(self.getArtistByName(artist)['id'],
+            results = self.spotify.artist_albums(self.get_artist_by_name(artist)['id'],
                                              album_type='album')
             albums.extend(results['items'])
             while results['next']:
@@ -73,7 +73,7 @@ class spotifyDataHandler:
     '''
     Método para obtener la información de los caciones de un album.
     '''
-    def albumTracks(self, album):
+    def album_tracks(self, album):
         tracks = []
 
         try:
@@ -90,12 +90,12 @@ class spotifyDataHandler:
     '''
     Método para obtener recomendaciones a partir de un artista por el nombre.
     '''
-    def recommendationByArtist(self, name):
+    def recommendation_by_artist(self, name):
         albums = []
 
         try:
             results = self.spotify.recommendations(seed_artists =
-                                                   [self.getArtistByName(name)['id']])
+                                                   [self.get_artist_by_name(name)['id']])
         except Exception:
             pass
         
@@ -105,14 +105,14 @@ class spotifyDataHandler:
     '''
     Método para obtener recomendaciones en forma de árbol a partir del nombre de un artista.
     '''
-    def spiderOfRecommendations(self, name, limitlen):
+    def spider_of_recommendations(self, name, limitlen):
         result = []
         recommend_queue = Queue()
         recommend_queue.put(name)
         finished = False
 
         while len(result) < limitlen and not finished and recommend_queue:
-            recommended = self.recommendationByArtist( recommend_queue.get() )
+            recommended = self.recommendation_by_artist( recommend_queue.get() )
             
             if recommended:
                 recommended = set([track['artists'][0]['name'] for track in recommended['tracks']])
@@ -134,7 +134,7 @@ class youtubeDataHandler:
         YOUTUBE_API_SERVICE_NAME = "youtube"
         YOUTUBE_API_VERSION = "v3"
         self.youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
-                             developerKey=DEVELOPER_KEY)
+                             developerKey = DEVELOPER_KEY)
 
    
     #Metodo para obtener el id de los videos
@@ -273,9 +273,9 @@ Ejemplos
 
 if __name__ == '__main__':
     data = spotifyDataHandler()
-    artist = data.getArtistByName("gorillaz",1)
+    artist = data.get_artist_by_name("gorillaz",1)
 
-    #albums = data.getAlbumsByArtist('gorillaz', 2)
+    #albums = data.get_albums_by_artist('gorillaz', 2)
 
     #data.categories()
 

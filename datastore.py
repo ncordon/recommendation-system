@@ -60,7 +60,7 @@ class DataStore:
     Devuelve los albums asociados al grupo pasado como argumento.
     Dicho grupo se supone que existe en la base de datos.
     """
-    def getAlbums(self,group_name):
+    def get_albums(self,group_name):
         query = Group.query(Group.name == group_name)
         for artist in query:
             albums = Album.query(Album.group_key == artist.key.id())
@@ -74,7 +74,7 @@ class DataStore:
     def get_data_for(self, group_name):
         musicbrainz_handler = musicbrainzHandler(group_name)
         # Obtenemos los datos aportados por spotify de un grupo
-        artist = spotify_handler.getArtistByName(group_name)
+        artist = spotify_handler.get_artist_by_name(group_name)
 
         ###################################
         # Esta parte no está funcionando
@@ -95,14 +95,14 @@ class DataStore:
                                        int(artist["followers"]["total"]),
                                        youtube_channel, tags)
         #Obtenemos todos los datos posibles de spotify de los albumes asociados al grupo anterior
-        albums = spotify_handler.getAlbumsByArtist(group_name)
+        albums = spotify_handler.get_albums_by_artist(group_name)
         
         
         for album in albums:
             video_id = youtube_handler.search_video(album["name"])
             album_key = self.create_album(str(album["name"]), "UNKNOWN", 0, 0000,
                                         album["external_urls"]["spotify"],video_id,int(artist_key))
-            tracks = spotify_handler.albumTracks(album)
+            tracks = spotify_handler.album_tracks(album)
             for track in tracks:
                 self.create_song(track["name"], float(track["duration_ms"]), 0,
                                  track["external_urls"]["spotify"], int(album_key),

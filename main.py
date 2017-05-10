@@ -19,8 +19,14 @@ from flask import *
 from google.appengine.ext import ndb
 import requests
 from recommender import *
+import pdb;
 
 app = Flask(__name__)
+
+def normalize(arg):
+    # Normalize argument. If we query for example Porcupine Tree, the HTTP petition gets done
+    # with "Porcupine%20Tree"
+    return arg.replace("%20", " ")
 
 @app.route("/")
 def index():
@@ -41,20 +47,19 @@ def recommend():
 
     for key, value in result.iteritems():
         if key != 'name':
-            local_recommendations = spotify_handler.spiderOfRecommendations(value, 10)
+            local_recommendations = spotify_handler.spider_of_recommendations(value, 10)
             recommendations = list(set().union(recommendations,local_recommendations))
 
     return render_template("table.html", recommendations = recommendations)
 
 @app.route("/<group_name>")
 def echo(group_name):
-    # Normalize group name. If we query for example Porcupine Tree, the HTTP petition gets done
-    # with "Porcupine%20Tree"
-    group_name = group_name.replace("%20", " ")
+    group_name = normalize(group_name)
     result = data_handler.retrieve_data_for(group_name)
-    albums = data_handler.getAlbums(group_name)
+    albums = data_handler.get_albums(group_name)
     #print albums
     return render_template("artist.html", result = result,albums = albums)
+
 @app.route("/bdtest2")
 def echo2():
     data_handler.get_data_for("gorillaz")
