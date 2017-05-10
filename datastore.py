@@ -99,15 +99,18 @@ class DataStore:
         
         
         for album in albums:
-            video_id = youtube_handler.search_video(album["name"])
-            album_key = self.create_album(str(album["name"]), "UNKNOWN", 0, 0000,
-                                        album["external_urls"]["spotify"],video_id,int(artist_key))
+            album_name = album['name'].encode("utf-8", "ignore")
+            video_id = youtube_handler.search_video(group_name + " " +
+                                                    album_name + " " + "full album")
+            album_key = self.create_album(album_name, "UNKNOWN", 0, 0000,
+                                          album["external_urls"]["spotify"],
+                                          video_id, int(artist_key))
             tracks = spotify_handler.album_tracks(album)
             for track in tracks:
-                self.create_song(track["name"], float(track["duration_ms"]), 0,
+                track_name = track["name"].encode("utf-8", "ignore")
+                self.create_song(track_name, float(track["duration_ms"]), 0,
                                  track["external_urls"]["spotify"], int(album_key),
                                  bool(track["explicit"]))
-
 
         
 

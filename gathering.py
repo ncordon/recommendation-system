@@ -41,14 +41,14 @@ class spotifyDataHandler:
     '''
     def get_album_by_name(self, name):
         results = self.spotify.search(q = name, limit = 1, type = "album")
-        albums = {}
+        album = {}
 
         try:
-            albums = results['albums']['items']
+            album = results['albums']['items'][0]
         except Exception:
             pass
         
-        return albums[0]
+        return album
 
     '''
     Método para obtener la información de los albumes de un artista por el nombre.
@@ -58,8 +58,9 @@ class spotifyDataHandler:
 
         try:
             results = self.spotify.artist_albums(self.get_artist_by_name(artist)['id'],
-                                             album_type='album')
+                                                 album_type = 'album', country = 'ES')
             albums.extend(results['items'])
+
             while results['next']:
                 results = self.spotify.next(results)
                 albums.extend(results['items'])
@@ -91,7 +92,7 @@ class spotifyDataHandler:
     Método para obtener recomendaciones a partir de un artista por el nombre.
     '''
     def recommendation_by_artist(self, name):
-        albums = []
+        results = []
 
         try:
             results = self.spotify.recommendations(seed_artists =
@@ -137,11 +138,10 @@ class youtubeDataHandler:
                              developerKey = DEVELOPER_KEY)
 
    
-    #Metodo para obtener el id de los videos
-    def search_channel(self,query,max_results=5):
-
-        search_response = self.youtube.search().list(q=query,part="id",
-                                                     maxResults=max_results).execute()
+    '''Metodo para obtener el id de los videos'''
+    def search_channel(self, query):
+        search_response = self.youtube.search().list(q = query, part = "id",
+                                                     maxResults = 5).execute()
 
         channels = []
                 
@@ -152,20 +152,25 @@ class youtubeDataHandler:
         return channels[0]
             
     
-    #Metodo para obtener el id de los videos
-    def search_video(self,query,max_results=5):
+    '''Metodo para obtener el id de los videos'''
+    def search_video(self, query):
+        search_response = self.youtube.search().list(q = query, part = "id,snippet").execute()
+        
+        video_url = "UNKNOWN"
 
-        search_response = self.youtube.search().list(q=query, part="id,snippet",
-                                                         maxResults=max_results).execute()
+        try:
+            id_video = search_result["items"]["id"]
+            if id_video["kind"] == "youtube#video":
+                video_url = "https://www.youtube.com/watch?v=" + id_video["videoId"]
+            else:
+                if id_video["kind"] == "youtube#playlist":
+                    video_url = "https://www.youtube.com/playlist?list=" + id_video["playlistId"]
+        except Exception:
+            pass
 
-        videos = []
-                
-        for search_result in search_response.get("items", []):
-            if search_result["id"]["kind"] == "youtube#video":
-                videos.append("%s" % (search_result["id"]["videoId"]))
-                
-        return videos[0]
-            
+        return video_url
+        
+
 
 
 
