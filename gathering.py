@@ -118,6 +118,7 @@ class spotifyDataHandler:
             if recommended:
                 recommended = set([track['artists'][0]['name'] for track in recommended['tracks']])
                 recommended = recommended - set(result)
+                recommended = recommended - {name}
                 result += list(recommended)
 
                 for group in recommended:
@@ -127,6 +128,7 @@ class spotifyDataHandler:
 
         result = result[:limitlen]
         return result
+
 
 class youtubeDataHandler:
 
