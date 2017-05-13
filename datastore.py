@@ -77,10 +77,8 @@ class DataStore:
         artist = spotify_handler.get_artist_by_name(group_name)
 
         ###################################
-        # Esta parte no está funcionando
-        #Buscamos su canal de youtube
-        youtube_channel=''
-        #youtube_channel = youtube_handler.search_channel(artist["name"])
+        # Buscamos su canal de youtube
+        youtube_channel= youtube_handler.search_channel(group_name)
         ###################################
 
         description = musicbrainz_handler.get_description()
@@ -94,7 +92,7 @@ class DataStore:
                                        artist["external_urls"]["spotify"],
                                        int(artist["followers"]["total"]),
                                        youtube_channel, tags)
-        #Obtenemos todos los datos posibles de spotify de los albumes asociados al grupo anterior
+        # Obtenemos todos los datos posibles de spotify de los albumes asociados al grupo anterior
         albums = spotify_handler.get_albums_by_artist(group_name)
         
         

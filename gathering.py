@@ -140,26 +140,27 @@ class youtubeDataHandler:
    
     '''Metodo para obtener el id de los videos'''
     def search_channel(self, query):
-        search_response = self.youtube.search().list(q = query, part = "id",
-                                                     maxResults = 5).execute()
+        search_response = self.youtube.search().list(q = query, part = "id", type = "channel",
+                                                     maxResults = 1).execute()
 
-        channels = []
-                
-        for search_result in search_response.get("items", []):
-            if search_result["id"]["kind"] == "youtube#channel":
-                videos.append("%s" % (search_result["id"]["channelId"]))
-                
-        return channels[0]
-            
+        channel_url = "Not Found"
+
+        try:
+            channel_id = search_response["items"][0]["id"]["channelId"]
+            channel_url = "https://www.youtube.com/channel/" + channel_id
+        except Exception:
+            pass
+
+        return channel_url
     
     '''Metodo para obtener el id de los videos'''
     def search_video(self, query):
         search_response = self.youtube.search().list(q = query, part = "id,snippet").execute()
-        
-        video_url = "UNKNOWN"
+        video_url = "Not Found"
 
         try:
-            id_video = search_result["items"]["id"]
+            id_video = search_response["items"][0]["id"]
+            
             if id_video["kind"] == "youtube#video":
                 video_url = "https://www.youtube.com/watch?v=" + id_video["videoId"]
             else:
