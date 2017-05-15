@@ -49,7 +49,8 @@ def echo(group_name):
 def echo3(group_name,album_name):
     album_name = normalize(album_name)
     albums = data_handler.get_album_data(album_name)
-    return render_template("album.html",result = albums)
+    songs = data_handler.get_songs(album_name)
+    return render_template("album.html",result = albums, songs= songs)
 
 @app.route("/bdtest2")
 def echo2():

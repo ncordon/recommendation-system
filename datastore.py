@@ -75,6 +75,22 @@ class DataStore:
         query = Album.query(Album.name == album_id)
         return query
     
+    
+    """
+    Devuelve las canciones asociados al disco pasado como argumento.
+    Dicho album se supone que existe en la base de datos.
+    """
+    def get_songs(self,album_id):
+        #query = Album.query(Album.album_key == album_id)
+        query = Album.query(Album.name == album_id)
+        for album in query:
+            songs = Song.query(Song.album_key == album.key.id())
+        return songs
+        
+    
+    
+    
+    
     """
     Obtiene datos para el grupo pasado como argumento,
     usando las APIs de spotify y youtube y scrapeando

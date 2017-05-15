@@ -7,5 +7,10 @@
     <p> <a href='{{ album.spotify_url}}'>{{album.spotify_url}}</a></p>
     <p><iframe width="560" height="315" src='{{album.video_url}}' frameborder="0" allowfullscreen></iframe>
     </p>
+    <ul>
+    {% for song in songs %}
+        <li><a href='{{song.spotify_url}}'>{{song.name}}</a></li>
+        {% endfor %}
+        </ul>
     {% endfor %}
 {% endblock %}
