@@ -1,20 +1,20 @@
 {% extends "layout.html" %}
 {% block body %}
 {% block title %}Grupos{% endblock %}
-<ul>
   {% for artist in result %}
-    <li> <h4>{{ artist.name }}</h4>
-    <a href='{{ artist.spotify_url}}'>{{artist.spotify_url}}</a>
-    <p>Género: {{ artist.genre}}</p>
+  <h4>{{ artist.name }}</h4>
+    <img src="{{artist.img}}" width="300" height="300">
+    <a href='{{ artist.spotify_url }}'>{{artist.spotify_url}}</a>
+    <p>Género: {{ artist.genre }} </p>
+    <p>Miembros:{{ artist.actual_members }}</p>
     <p>{{artist.description}}</p>
+    <p>Canal de Youtube: <a href='{{artist.youtube_channel}}'> {{artist.youtube_channel}}</a></p>
     <ul>Discografia:
         {% for album in albums %}
             <li><a  href='./{{artist.name}}/{{album.name}}'>{{album.name}}</a></li>
         {% endfor %}
     </ul>
-    
-    </li>
   {% endfor %}
-</ul>
 {% endblock %}
 
+ 

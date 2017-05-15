@@ -4,13 +4,15 @@
     {% for album in result%}
     <p>{{album.name}}</p><br>
     <p>Género : {{album.genre}}</p>
+    <p>Año : {{album.year}} </p>
     <p> <a href='{{ album.spotify_url}}'>{{album.spotify_url}}</a></p>
     <p><iframe width="560" height="315" src='{{album.video_url}}' frameborder="0" allowfullscreen></iframe>
     </p>
+    Canciones:
     <ul>
     {% for song in songs %}
         <li><a href='{{song.spotify_url}}'>{{song.name}}</a></li>
-        {% endfor %}
-        </ul>
+    {% endfor %}
+    </ul>
     {% endfor %}
 {% endblock %}

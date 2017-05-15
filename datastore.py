@@ -11,12 +11,12 @@ class DataStore:
     """
     def create_group(self, name, description, genre, actual_members, former_members,
                      score, area, begin_year, spotify_url, spotify_followers,
-                     youtube_channel, tags):
+                     youtube_channel, tags,img):
         group = Group(name = name, description = description, genre = genre,
                       actual_members = actual_members, former_members = former_members,
                       score = score, begin_year = begin_year, area = area,
                       spotify_url = spotify_url, spotify_followers = spotify_followers,
-                      youtube_channel = youtube_channel, tags = tags)
+                      youtube_channel = youtube_channel, tags = tags,img = img)
         group_key = group.put()
         return group_key.id()
 
@@ -48,7 +48,6 @@ class DataStore:
     """
     def retrieve_data_for(self, group_name):
         query = Group.query(Group.name == group_name)
-
         if query.count() == 0:
             key = self.get_data_for(group_name)
             query = Group.query(Group.name == group_name)
@@ -100,7 +99,7 @@ class DataStore:
         musicbrainz_handler = musicbrainzHandler(group_name)
         # Obtenemos los datos aportados por spotify de un grupo
         artist = spotify_handler.get_artist_by_name(group_name)
-
+    
         ###################################
         # Buscamos su canal de youtube
         youtube_channel= youtube_handler.search_channel(group_name)
@@ -116,7 +115,7 @@ class DataStore:
                                        int(artist["popularity"]), "UNKNOWN", 0000,
                                        artist["external_urls"]["spotify"],
                                        int(artist["followers"]["total"]),
-                                       youtube_channel, tags)
+                                       youtube_channel, tags,artist["images"][0]['url'])
         # Obtenemos todos los datos posibles de spotify de los albumes asociados al grupo anterior
         albums = spotify_handler.get_albums_by_artist(group_name)
         
@@ -136,7 +135,7 @@ class DataStore:
                                  bool(track["explicit"]))
 
         
-
+        
 
 class Group(ndb.Model):
     name = ndb.StringProperty( required = True )
@@ -152,6 +151,7 @@ class Group(ndb.Model):
     youtube_channel = ndb.StringProperty()
     similar_groups = ndb.KeyProperty( repeated = True, indexed = True )
     tags = ndb.StringProperty( repeated = True )
+    img = ndb.StringProperty()
     
 class Album(ndb.Model):
     name = ndb.StringProperty( required = True )
