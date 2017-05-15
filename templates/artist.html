@@ -5,11 +5,11 @@
   {% for artist in result %}
     <li> <h4>{{ artist.name }}</h4>
     <a href='{{ artist.spotify_url}}'>{{artist.spotify_url}}</a>
-    <p>Género: {{artist.genre}}</p>
+    <p>Género: {{ artist.genre}}</p>
     <p>{{artist.description}}</p>
     <ul>Discografia:
         {% for album in albums %}
-            <li><a href=''>{{album.name}}</a></li>
+            <li><a  href='./{{artist.name}}/{{album.name}}'>{{album.name}}</a></li>
         {% endfor %}
     </ul>
     
@@ -17,3 +17,4 @@
   {% endfor %}
 </ul>
 {% endblock %}
+

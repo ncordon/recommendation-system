@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block body %}
+{% block title %}Album{% endblock %}
+    {% for album in result%}
+    <p>{{album.name}}</p><br>
+    <p>Género : {{album.genre}}</p>
+    <p> <a href='{{ album.spotify_url}}'>{{album.spotify_url}}</a></p>
+    <p><iframe width="560" height="315" src='{{album.video_url}}' frameborder="0" allowfullscreen></iframe>
+    </p>
+    {% endfor %}
+{% endblock %}

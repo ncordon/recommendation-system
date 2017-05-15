@@ -164,7 +164,7 @@ class youtubeDataHandler:
             id_video = search_response["items"][0]["id"]
             
             if id_video["kind"] == "youtube#video":
-                video_url = "https://www.youtube.com/watch?v=" + id_video["videoId"]
+                video_url = "https://www.youtube.com/embed/" + id_video["videoId"]
             else:
                 if id_video["kind"] == "youtube#playlist":
                     video_url = "https://www.youtube.com/playlist?list=" + id_video["playlistId"]

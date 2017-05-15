@@ -66,6 +66,15 @@ class DataStore:
             albums = Album.query(Album.group_key == artist.key.id())
         return albums
         
+    
+    """
+    Obtiene la informacion de un album pasado como parámetro
+    """
+    def get_album_data(self,album_id):
+        #query = Album.query(Album.album_key == album_id)
+        query = Album.query(Album.name == album_id)
+        return query
+    
     """
     Obtiene datos para el grupo pasado como argumento,
     usando las APIs de spotify y youtube y scrapeando

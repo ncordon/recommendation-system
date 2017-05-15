@@ -43,8 +43,13 @@ def echo(group_name):
     group_name = normalize(group_name)
     result = data_handler.retrieve_data_for(group_name)
     albums = data_handler.get_albums(group_name)
-    #print albums
     return render_template("artist.html", result = result,albums = albums)
+
+@app.route("/<group_name>/<album_name>")
+def echo3(group_name,album_name):
+    album_name = normalize(album_name)
+    albums = data_handler.get_album_data(album_name)
+    return render_template("album.html",result = albums)
 
 @app.route("/bdtest2")
 def echo2():
