@@ -54,7 +54,7 @@ def echo3(group_name,album_name):
 
 @app.route("/bdtest2")
 def echo2():
-    data_handler.get_data_for("gorillaz")
+    result = data_handler.retrieve_data_for("Gorillaz")
     return("FUNCIONA!!")
 
 

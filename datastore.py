@@ -3,6 +3,7 @@
 
 from google.appengine.ext import ndb
 from gathering import *
+from fuzzywuzzy import fuzz
 
 class DataStore:
     """
@@ -47,11 +48,19 @@ class DataStore:
     y lo devuelve
     """
     def retrieve_data_for(self, group_name):
-        query = Group.query(Group.name == group_name)
-        if query.count() == 0:
+        found = False
+        groups = Group.query()
+        print(groups)
+        for group in groups:
+            print(str(fuzz.ratio(group.name.lower(), group_name.lower())))
+            if(fuzz.ratio(group.name.lower(), group_name.lower()) >= 80):
+                print group
+                query = Group.query(Group.name == group.name)
+                found = True
+
+        if(not found):
             key = self.get_data_for(group_name)
             query = Group.query(Group.name == group_name)
-        
 
         return query
     
@@ -133,9 +142,6 @@ class DataStore:
                 self.create_song(track_name, float(track["duration_ms"]), 0,
                                  track["external_urls"]["spotify"], int(album_key),
                                  bool(track["explicit"]))
-
-        
-        
 
 class Group(ndb.Model):
     name = ndb.StringProperty( required = True )
