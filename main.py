@@ -29,13 +29,14 @@ def recommendation():
 @app.route("/answer-recommendation", methods = ["POST","GET"])
 def recommend():
     result = request.form
-    recommendations = []
+    values = []
 
     for key, value in result.iteritems():
         if key != 'name':
-            local_recommendations = spotify_handler.spider_of_recommendations(value, 10)
-            recommendations = list(set().union(recommendations,local_recommendations))
-
+	    values.insert(0, value)
+    
+    recommendations = get_recommendations(values)
+            
     return render_template("table.html", recommendations = recommendations)
 
 @app.route("/<group_name>")
