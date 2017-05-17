@@ -74,6 +74,28 @@ form input {
 	filter: saturate(10%);
 }
 
+.group-img {
+  margin: 0 auto 0 auto;
+  text-align: center;
+  border-radius: 100%;
+  display: block;
+  border: 3px solid white;
+}
+
+.group-name {
+  text-align: center;
+  font-size: 35px;
+}
+
+.group_table {
+  background: #e1e0e0;
+  border-radius:10px
+}
+
+.group_table li {
+  list-style-type: none;
+}
+
 footer{
   border-top: 4px solid rgba(43, 43, 43, 0.25);
   background-color: rgba(167, 167, 167, 0.55);
@@ -139,3 +161,6 @@ footer{
     padding: 3%;
   }
 }
+
+
+

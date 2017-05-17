@@ -14,15 +14,11 @@ def normalize(arg):
     # with "Porcupine%20Tree"
     return arg.replace("%20", " ")
 
-@app.route("/")
-def index():
-    return render_template("index.html")
-
 @app.route("/about")
 def about():
     return render_template("about.html")
 
-@app.route("/ask-recommendation")
+@app.route("/")
 def recommendation():
     return render_template("ask-recommendation.html")
 
@@ -64,4 +60,4 @@ def not_found(error):
     return render_template("404.html"), 404
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', threaded=True)
+    app.run(host='0.0.0.0', threaded=False)

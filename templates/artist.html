@@ -1,19 +1,51 @@
 {% extends "layout.html" %}
-{% block body %}
 {% block title %}Grupos{% endblock %}
+{% block body %}
   {% for artist in result %}
-  <h4>{{ artist.name }}</h4>
-    <img src="{{artist.img}}" width="300" height="300">
-    <a href='{{ artist.spotify_url }}'>{{artist.spotify_url}}</a>
-    <p>Género: {{ artist.genre }} </p>
-    <p>Miembros:{{ artist.actual_members }}</p>
-    <p>{{artist.description}}</p>
-    <p>Canal de Youtube: <a href='{{artist.youtube_channel}}'> {{artist.youtube_channel}}</a></p>
-    <ul>Discografia:
-        {% for album in albums %}
-            <li><a  href='./{{artist.name}}/{{album.name}}'>{{album.name}}</a></li>
-        {% endfor %}
-    </ul>
+  <img class="group-img" src="{{artist.img}}" width="200" height="200">
+  <h3 class="group-name">{{ artist.name }}</h3>
+  <h4>Descripción:</h4>
+  <p>{{artist.description}}</p>
+  <table class="pure-table group_table">
+    <tr>
+      <td>Géneros:</td>
+      <td>
+        <ul>
+          {% for genre in artist.genre %}
+            <li>{{ genre }}</li>
+          {% endfor %}
+        </ul>
+      </td>
+    </tr>
+    <tr class="pure-table-odd">
+      <td>Miembros:</td>
+      <td>
+        <ul>
+          {% for member in artist.actual_members %}
+            <li>{{ member }}</li>
+          {% endfor %}
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Canal de Youtube:</td>
+      <td><a href='{{artist.youtube_channel}}'> {{ artist.youtube_channel }}</a></td>
+    </tr>
+    <tr class="pure-table-odd">
+      <td>Canal de Spotify:</td>
+      <td><a href='{{ artist.spotify_url }}'>{{artist.spotify_url}}</a></td>
+    </tr>
+    <tr>
+      <td>Discografia:</td>
+      <td>
+        <ul>
+          {% for album in albums %}
+            <li><a  href='./{{artist.name}}/{{album.name}}'>{{ album.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </td>
+    </tr>
+  </table>
   {% endfor %}
 {% endblock %}
 

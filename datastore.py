@@ -56,8 +56,8 @@ class DataStore:
                 found = True
 
         if(not found):
-            key = self.get_data_for(group_name)
-            query = Group.query(Group.name == group_name)
+            db_group_name = self.get_data_for(group_name)
+            query = Group.query(Group.name == db_group_name)
 
         return query
     
@@ -117,7 +117,7 @@ class DataStore:
         tags = musicbrainz_handler.get_tags()
         similar_groups = spotify_handler.spider_of_recommendations(artist["name"], 5)
 
-        artist_key = self.create_group(artist["name"], description, str(artist["genres"]),
+        artist_key = self.create_group(artist["name"], description, artist["genres"],
                                        actual_members, former_members,
                                        int(artist["popularity"]), "UNKNOWN", 0000,
                                        artist["external_urls"]["spotify"],
@@ -140,11 +140,12 @@ class DataStore:
                 self.create_song(track_name, float(track["duration_ms"]), 0,
                                  track["external_urls"]["spotify"], int(album_key),
                                  bool(track["explicit"]))
+        return artist["name"]
 
 class Group(ndb.Model):
     name = ndb.StringProperty( required = True )
     description = ndb.TextProperty()
-    genre = ndb.StringProperty()
+    genre = ndb.StringProperty( repeated = True )
     actual_members = ndb.StringProperty( repeated = True )
     former_members = ndb.StringProperty( repeated = True )
     score = ndb.IntegerProperty()
