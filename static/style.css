@@ -33,6 +33,10 @@ header {
   min-height: 30vh;
 }
 
+.content table {
+  margin:0 auto 0 auto;
+}
+
 fieldset {
   text-align: center;
   background-color: #deaca4;
@@ -80,6 +84,11 @@ form input {
   border-radius: 100%;
   display: block;
   border: 3px solid white;
+}
+
+.content iframe {
+  display:block;
+  margin:0 auto 0 auto;
 }
 
 .group-name {

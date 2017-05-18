@@ -1,31 +1,33 @@
 {% extends "layout.html" %}
+{% block title %}Album{% endblock %}
 {% block body %}
-{% block title %}{% endblock %}
     {% for album in result%}
-    <h3 class="group-name">{{ album.name }}</h3>
-    <p class="video"><iframe src='{{album.video_url}}' frameborder="0" allowfullscreen></iframe></p>
+    <h3 class="group-name">{{album.name}}</h3>
+    <p><iframe width="560" height="315" src='{{album.video_url}}' frameborder="0" allowfullscreen></iframe>
+    </p>
     <table class="pure-table group_table">
-    <tr>
-        <td>Género : </td>
+      <tr>
+        <td>Género: </td>
         <td>{{album.genre}}</td>
-    </tr>
-    <tr>
-        <td>Año :</td>
+      </tr>
+      <tr class="pure-table-odd">
+        <td>Año: </td>
         <td>{{album.year}}</td>
-    </tr>
-    <tr>
-        <td> Enlace del album en Spotify</td>
+      </tr>
+      <tr>
+        <td>Enlace a Spotify:</td>
         <td><a href='{{ album.spotify_url}}'>{{album.spotify_url}}</a></td>
-    </tr>
-    <tr>
+      </tr>
+      <tr class="pure-table-odd">
         <td>Canciones:</td>
-        <td><ul>
+        <td>
+          <ul>
             {% for song in songs %}
-                <li><a href='{{song.spotify_url}}'>{{song.name}}</a></li>
+            <li><a href='{{song.spotify_url}}'>{{song.name}}</a></li>
             {% endfor %}
-            </ul>
+          </ul>
         </td>
-    </tr>
+      </tr>
     </table>
     {% endfor %}
 {% endblock %}
