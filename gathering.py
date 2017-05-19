@@ -14,6 +14,7 @@ from googleapiclient.errors import HttpError
 from lxml import html
 import requests
 from Queue import *
+import pdb
 
 class spotifyDataHandler:
 
@@ -183,8 +184,8 @@ class musicbrainzHandler:
         # Calcula el nombre concatenando partes separadas por espacio por un +
         formatted_name="+".join(group_name.split())
         base_page = 'https://musicbrainz.org'
-        results_page = requests.get(base_page + '/search?query=' + formatted_name + '&type=artist',
-                                    timeout = None)
+        search_url = base_page + '/search?query=' + formatted_name + '&type=artist&method=indexed'
+        results_page = requests.get(search_url, timeout = None)
         # Extrae url del primer resultado al buscar en musicbrainz el nombre del grupo
         base_tree = html.fromstring(results_page.content)
         first_result = base_tree.xpath(
@@ -214,7 +215,7 @@ class musicbrainzHandler:
         except Exception:
             pass
         
-        return description
+        return description.encode("ISO-8859-1", "ignore").decode('utf8')
 
 
     def __get_members(self, actual):

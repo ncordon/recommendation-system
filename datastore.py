@@ -4,6 +4,10 @@
 from google.appengine.ext import ndb
 from gathering import *
 from fuzzywuzzy import fuzz
+import pdb
+
+def to_utf8(string):
+  return string.encode("utf-8", "ignore")
 
 class DataStore:
     """
@@ -118,7 +122,6 @@ class DataStore:
         former_members = musicbrainz_handler.get_former_members()
         tags = musicbrainz_handler.get_tags()
         similar_groups = spotify_handler.spider_of_recommendations(artist["name"], 5)
-
         artist_key = self.create_group(artist["name"], description, artist["genres"],
                                        actual_members, former_members,
                                        int(artist["popularity"]), "UNKNOWN", 0000,
@@ -131,7 +134,8 @@ class DataStore:
         
         
         for album in albums:
-            album_name = album['name'].encode("utf-8", "ignore")
+            album_name = to_utf8(album['name'])
+            group_name = to_utf8(group_name)
             video_id = youtube_handler.search_video(group_name + " " +
                                                     album_name + " " + "full album")
             album_key = self.create_album(album_name, "UNKNOWN", 0, 0000,

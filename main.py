@@ -5,7 +5,7 @@ from flask import *
 from google.appengine.ext import ndb
 import requests
 from recommender import *
-import pdb;
+import pdb
 
 app = Flask(__name__)
 
@@ -25,16 +25,17 @@ def recommendation():
 @app.route("/answer-recommendation", methods = ["POST","GET"])
 def recommend():
     result = request.form
-    values = []
+    values = result.values()
+    # Elimina strings vacíos de la lista, esto es, artistas no introducidos
+    values = filter(None, values)
 
-    for key, value in result.iteritems():
-        if key != 'name':
-	    values.insert(0, value)
+    if values:
+        recommendations = get_recommendations(values)
+        return render_template("table.html", recommendations = recommendations)
+    else:
+        return render_template("ask-recommendation.html")
+
     
-    recommendations = get_recommendations(values)
-            
-    return render_template("table.html", recommendations = recommendations)
-
 @app.route("/<group_name>")
 def echo(group_name):
     group_name = normalize(group_name)
@@ -48,11 +49,6 @@ def echo3(group_name,album_name):
     albums = data_handler.get_album_data(album_name)
     songs = data_handler.get_songs(album_name)
     return render_template("album.html",result = albums, songs= songs)
-
-@app.route("/bdtest2")
-def echo2():
-    result = data_handler.retrieve_data_for("Gorillaz")
-    return("FUNCIONA!!")
 
 
 @app.errorhandler(404)
