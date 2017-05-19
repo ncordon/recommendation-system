@@ -40,7 +40,7 @@ def recommend():
 def echo(group_name):
     group_name = normalize(group_name)
     artist = data_handler.retrieve_data_for(group_name)
-    albums = data_handler.get_albums(group_name)
+    albums = data_handler.get_albums(artist.name)
     return render_template("artist.html", artist = artist, albums = albums)
 
 @app.route("/<group_name>/<album_name>")
