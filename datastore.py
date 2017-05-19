@@ -52,6 +52,23 @@ class DataStore:
     Si no existe en base de datos, lo crea con get_data_for 
     y lo devuelve
     """
+    def thread_retrieve_data_for(self, group_name, queue):
+        found = False
+        groups = Group.query(projection = ['name']).iter()
+
+        while groups.has_next() and not found:
+            stored = groups.next()
+
+            if(fuzz.ratio(stored.name.lower(), group_name.lower()) >= 80):
+                artist = stored.key.get()
+                found = True
+
+        if not found:
+            group_key = self.get_data_for(group_name)
+            artist = group_key.get()
+
+        queue.put(artist)    
+
     def retrieve_data_for(self, group_name):
         found = False
         groups = Group.query(projection = ['name']).iter()
@@ -68,7 +85,7 @@ class DataStore:
             artist = group_key.get()
 
         return artist
-    
+
     """
     Devuelve los albums asociados al grupo pasado como argumento.
     Dicho grupo se supone que existe en la base de datos.
