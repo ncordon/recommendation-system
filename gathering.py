@@ -201,12 +201,14 @@ class musicbrainzHandler:
         tags_page = requests.get(self.artist_url + '/tags', timeout = None)
         self.tags = html.fromstring(tags_page.content)
 
+        wiki_page = requests.get(self.artist_url + '/wikipedia-extract', timeout = None)
+        self.wiki_extract = html.fromstring(wiki_page.content)
         
     """Scrapea la descripción del grupo"""
     def get_description(self):
         description = ""
         try:
-            description = self.overview.xpath(
+            description = self.wiki_extract.xpath(
                 '//div[@class="wikipedia-extract-body wikipedia-extract-collapse"]'
             )[0].text_content()
         except Exception:
