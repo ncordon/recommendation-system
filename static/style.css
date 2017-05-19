@@ -95,7 +95,14 @@ form input {
 .group_table li {
   list-style-type: none;
 }
-
+.video{
+  float: left;
+  width: 40%;
+}
+.video iframe{
+  width: 80%;
+  height: 200px;
+}
 footer{
   border-top: 4px solid rgba(43, 43, 43, 0.25);
   background-color: rgba(167, 167, 167, 0.55);
