@@ -17,9 +17,10 @@ class DataStore:
                       actual_members = actual_members, former_members = former_members,
                       score = score, begin_year = begin_year, area = area,
                       spotify_url = spotify_url, spotify_followers = spotify_followers,
-                      youtube_channel = youtube_channel, tags = tags,img = img, similar_groups = similar_groups)
+                      youtube_channel = youtube_channel, tags = tags,img = img, similar_groups =
+                      similar_groups)
         group_key = group.put()
-        return group_key.id()
+        return group_key
 
     """
     Crea una canción en base de datos con los parámetros pasados
@@ -29,7 +30,7 @@ class DataStore:
         song = Song(name = name, duration = duration, score = score,
                     album_key = album_key, spotify_url = spotify_url, explicit = explicit)
         song_key = song.put()
-        return song_key.id()
+        return song_key
 
     """
     Crea un álbum con los parámetros pasados
@@ -39,7 +40,7 @@ class DataStore:
         album = Album(name = name, genre = genre, score = score, year = year,
                       group_key = group_key, spotify_url = spotify_url,video_url=video_url)
         album_key = album.put()
-        return album_key.id()
+        return album_key
 
 
     """
@@ -49,23 +50,26 @@ class DataStore:
     """
     def retrieve_data_for(self, group_name):
         found = False
-        groups = Group.query()
-        for group in groups:
-            if(fuzz.ratio(group.name.lower(), group_name.lower()) >= 80):
-                query = Group.query(Group.name == group.name)
+        groups = Group.query(projection = ['name']).iter()
+
+        while groups.has_next() and not found:
+            stored = groups.next()
+
+            if(fuzz.ratio(stored.name.lower(), group_name.lower()) >= 80):
+                artist = stored.key.get()
                 found = True
 
-        if(not found):
-            db_group_name = self.get_data_for(group_name)
-            query = Group.query(Group.name == db_group_name)
+        if not found:
+            group_key = self.get_data_for(group_name)
+            artist = group_key.get()
 
-        return query
+        return artist
     
     """
     Devuelve los albums asociados al grupo pasado como argumento.
     Dicho grupo se supone que existe en la base de datos.
     """
-    def get_albums(self,group_name):
+    def get_albums(self, group_name):
         query = Group.query(Group.name == group_name)
         for artist in query:
             albums = Album.query(Album.group_key == artist.key.id())
@@ -91,8 +95,6 @@ class DataStore:
         for album in query:
             songs = Song.query(Song.album_key == album.key.id())
         return songs
-        
-    
     
     
     
@@ -122,7 +124,8 @@ class DataStore:
                                        int(artist["popularity"]), "UNKNOWN", 0000,
                                        artist["external_urls"]["spotify"],
                                        int(artist["followers"]["total"]),
-                                       youtube_channel, tags,artist["images"][0]['url'], similar_groups)
+                                       youtube_channel, tags,artist["images"][0]['url'],
+                                       similar_groups)
         # Obtenemos todos los datos posibles de spotify de los albumes asociados al grupo anterior
         albums = spotify_handler.get_albums_by_artist(group_name)
         
@@ -133,14 +136,14 @@ class DataStore:
                                                     album_name + " " + "full album")
             album_key = self.create_album(album_name, "UNKNOWN", 0, 0000,
                                           album["external_urls"]["spotify"],
-                                          video_id, int(artist_key))
+                                          video_id, int(artist_key.id()))
             tracks = spotify_handler.album_tracks(album)
             for track in tracks:
                 track_name = track["name"].encode("utf-8", "ignore")
                 self.create_song(track_name, float(track["duration_ms"]), 0,
-                                 track["external_urls"]["spotify"], int(album_key),
+                                 track["external_urls"]["spotify"], int(album_key.id()),
                                  bool(track["explicit"]))
-        return artist["name"]
+        return artist_key
 
 class Group(ndb.Model):
     name = ndb.StringProperty( required = True )

@@ -1,7 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}Grupos{% endblock %}
 {% block body %}
-  {% for artist in result %}
   <img class="group-img" src="{{artist.img}}" width="200" height="200">
   <h3 class="group-name">{{ artist.name }}</h3>
   <h4>Descripción:</h4>
@@ -46,7 +45,6 @@
       </td>
     </tr>
   </table>
-  {% endfor %}
 {% endblock %}
 
  
