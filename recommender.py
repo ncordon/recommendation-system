@@ -11,6 +11,7 @@ def get_recommendations(values):
     
     for value in values:
         artist = data_handler.retrieve_data_for(value)
+
         local_recommendations = artist.similar_groups
         recommendations = list(set().union(recommendations, local_recommendations))
 

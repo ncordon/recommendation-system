@@ -147,6 +147,7 @@ class DataStore:
                 self.create_song(track_name, float(track["duration_ms"]), 0,
                                  track["external_urls"]["spotify"], int(album_key.id()),
                                  bool(track["explicit"]))
+
         return artist_key
 
 class Group(ndb.Model):

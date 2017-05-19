@@ -30,8 +30,11 @@ def recommend():
     values = filter(None, values)
 
     if values:
-        recommendations = get_recommendations(values)
-        return render_template("table.html", recommendations = recommendations)
+        try:
+            recommendations = get_recommendations(values)
+            return render_template("table.html", recommendations = recommendations)
+        except Exception:
+            return render_template("notFound.html", group_name = str(values))
     else:
         return render_template("ask-recommendation.html")
 
@@ -39,9 +42,12 @@ def recommend():
 @app.route("/<group_name>")
 def echo(group_name):
     group_name = normalize(group_name)
-    artist = data_handler.retrieve_data_for(group_name)
-    albums = data_handler.get_albums(artist.name)
-    return render_template("artist.html", artist = artist, albums = albums)
+    try:
+        artist = data_handler.retrieve_data_for(group_name)
+        albums = data_handler.get_albums(artist.name)
+        return render_template("artist.html", artist = artist, albums = albums)
+    except Exception:
+        return render_template("notFound.html", group_name = group_name)
 
 @app.route("/<group_name>/<album_name>")
 def echo3(group_name,album_name):
