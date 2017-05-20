@@ -4,12 +4,18 @@
 from google.appengine.ext import ndb
 from gathering import *
 from fuzzywuzzy import fuzz
-from threading import Thread
-import Queue
-import pdb
 
+
+""" 
+Método para convertir strings a utf8 
+
+Args:
+   string (str): string a convertir a utf8
+"""
 def to_utf8(string):
   return string.encode("utf-8", "ignore")
+
+
 
 class DataStore:
     """
@@ -49,13 +55,22 @@ class DataStore:
 
     """
     Crea una recomendación en base de datos
+    Devuelve la key de la recomendación creada
     """
     def create_recommendation(self, name, similar_groups):
         recommendation = Recommendation(name = name, similar_groups = similar_groups)
         recommendation_key = recommendation.put()
         return recommendation_key
 
-      
+    """
+    Método para calcular si un resultado es lo suficientemente similar de 
+    entre los de una query, respecto a un target
+
+       Comprueba si el valor de 'name' para algún elemento de query es 
+       lo suficientemente similar a target, y devuelve el más similar
+
+       Caso de que no haya uno suficientement similar, devuelve None
+    """
     def __more_similar_from_to(self, query, target):
         max_similarity = 0
         result = None
@@ -71,7 +86,14 @@ class DataStore:
 
         return result
       
-
+    """
+    Método paralelizado para obtener recomendaciones a partir de la API de Spotify
+    
+    Args:
+       group_name (str): nombre del grupo para el que calcular la recomendación
+       n_recommendations(int): número de recomendaciones a obtener
+       request_queue (Queue): cola de peticiones paralelizadas donde escribir el resultado
+    """
     def thread_retrieve_recommendations(self, group_name, n_recommendations, request_queue):
         groups = Recommendation.query(projection = ['name']).iter()
         
@@ -87,8 +109,17 @@ class DataStore:
             if current_similar:
                 self.create_recommendation(group_name, current_similar)            
                 request_queue.put(current_similar)
-        
-    
+
+    """
+    Devuelve un grupo en caso de que exista en base de datos 
+    o se pueda recuperar información de él desde todas las 
+    fuentes de datos
+       Si existe
+
+    Args:
+       group_name (str): nombre del grupo
+       
+    """
     def retrieve_data_for(self, group_name):
         groups = Group.query(projection = ['name']).iter()
         most_similar = self.__more_similar_from_to(groups, group_name)
@@ -101,9 +132,15 @@ class DataStore:
         
         return artist
 
+      
     """
     Devuelve los albums asociados al grupo pasado como argumento.
     Dicho grupo se supone que existe en la base de datos.
+
+    Args:
+       group_name (str): nombre del grupo
+    Returns:
+       albums
     """
     def get_albums(self, group_name):
         artist = (Group.query(Group.name == group_name)).get()
@@ -116,7 +153,11 @@ class DataStore:
         
     
     """
-    Obtiene la informacion de un album pasado como parámetro
+    Obtiene la informacion de un album pasado su nombre como parámetro
+
+    Args:
+       album_name (str): nombre del grupo
+    
     """
     def get_album_data(self, album_name):
         #query = Album.query(Album.album_key == album_id)
@@ -127,6 +168,10 @@ class DataStore:
     """
     Devuelve las canciones asociados al disco pasado como argumento.
     Dicho album se supone que existe en la base de datos.
+    
+    Args:
+       album_name (str): nombre del grupo
+
     """
     def get_songs(self, album_name):
         album = Album.query(Album.name == album_name).get()
@@ -143,15 +188,16 @@ class DataStore:
     Metodo void.
     El album y los argumentos se pasan en el método get_data_for y se suponen existentes.
     """    
-    def thread_retrieve_songs_for(self, album, group_name, artist_key):
+    def retrieve_songs_for(self, album, group_name, artist_key):
         album_name = to_utf8(album['name'])
         group_name = to_utf8(group_name)
         video_id = youtube_handler.search_video(group_name + " " +
                                                     album_name + " " + "full album")
         album_key = self.create_album(album_name, "UNKNOWN", 0, 0000,
-                                          album["external_urls"]["spotify"],
-                                          video_id, artist_key)
+                                      album["external_urls"]["spotify"],
+                                      video_id, artist_key)
         tracks = spotify_handler.album_tracks(album)
+        
         for track in tracks:
             track_name = track["name"].encode("utf-8", "ignore")
             self.create_song(track_name, float(track["duration_ms"]), 0,
@@ -163,9 +209,12 @@ class DataStore:
     usando la API de spotify para realizarlo de forma
     paralela a musicbrainz.
     """    
-    def thread_retrieve_from_spotify_for(self, group_name, requests_queue):    
-        artist = spotify_handler.get_artist_by_name(group_name)
-        requests_queue.put(artist)
+    def retrieve_from_apis_for(self, group_name, results):    
+        results['artist'] = spotify_handler.get_artist_by_name(group_name)
+        # Obtenemos todos los datos posibles de spotify de los albumes asociados al grupo anterior
+        results['albums'] = spotify_handler.get_albums_by_artist(group_name)       
+        # Buscamos su canal de youtube
+        results['youtube_channel'] = youtube_handler.search_channel(group_name)
 
        
     """
@@ -174,28 +223,22 @@ class DataStore:
     datos desde musicbrainz
     """
     def get_data_for(self, group_name):
-        queue = Queue.Queue()
-        musicbrainz_handler = musicbrainzHandler(group_name)
+        results = {}
         # Creamos una hebra para que Spotify trabaje en segundo plano mientras scrapeamos
-    
-        spotify_thread = Thread(target = self.thread_retrieve_from_spotify_for,
-                                args = [group_name, queue, ])
-        spotify_thread.start()
+        apis_thread = Thread(target = self.retrieve_from_apis_for, args = [group_name, results])
+        apis_thread.start()
 
-        ###################################
-        # Buscamos su canal de youtube
-        youtube_channel = youtube_handler.search_channel(group_name)
-        ###################################
-
+        musicbrainz_handler = musicbrainzHandler(group_name)
         description = musicbrainz_handler.get_description()
         actual_members = musicbrainz_handler.get_actual_members()
         former_members = musicbrainz_handler.get_former_members()
         tags = musicbrainz_handler.get_tags()
 
         # Unimos la hebra de spotify y recojemos sus resultados
-        spotify_thread.join()
-        artist = queue.get()
-        similar_groups = spotify_handler.spider_of_recommendations(artist["name"], 5)
+        apis_thread.join()
+        artist = results['artist']
+        albums = results['albums']
+        youtube_channel = results['youtube_channel']
 
         artist_key = self.create_group(artist["name"], description, artist["genres"],
                                        actual_members, former_members,
@@ -203,15 +246,14 @@ class DataStore:
                                        artist["external_urls"]["spotify"],
                                        int(artist["followers"]["total"]),
                                        youtube_channel, tags,artist["images"][0]['url'])
-        # Obtenemos todos los datos posibles de spotify de los albumes asociados al grupo anterior
-        albums = spotify_handler.get_albums_by_artist(group_name)
         
         # Creamos una hebra por cada album del disco para examinarlos de forma paralela
         threads = []
-        for album in albums:
-            threads.insert(0,Thread(target = self.thread_retrieve_songs_for,
-                                    args = [album, group_name, artist_key, ]))
-            threads[0].start()
+        
+        for i in range(len(albums)):
+            threads.append(Thread(target = self.retrieve_songs_for,
+                                  args = [albums[i], group_name, artist_key, ]))
+            threads[i].start()
 
         # Esperamos a que terminen todas las hebras
         for thread in threads:

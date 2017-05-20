@@ -5,7 +5,6 @@ from flask import *
 from google.appengine.ext import ndb
 import requests
 from recommender import *
-import pdb
 
 app = Flask(__name__)
 

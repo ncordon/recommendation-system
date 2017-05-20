@@ -13,7 +13,8 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from lxml import html
 import requests
-from Queue import *
+from threading import Thread
+import Queue
 import pdb
 
 class spotifyDataHandler:
@@ -109,7 +110,7 @@ class spotifyDataHandler:
     '''
     def spider_of_recommendations(self, name, limitlen):
         result = []
-        recommend_queue = Queue()
+        recommend_queue = Queue.Queue()
         recommend_queue.put(name)
         finished = False
 
@@ -182,7 +183,7 @@ class musicbrainzHandler:
     def __init__(self, group_name):
         self.group_name = group_name
         # Calcula el nombre concatenando partes separadas por espacio por un +
-        formatted_name="+".join(group_name.split())
+        formatted_name="+".join(self.group_name.split())
         base_page = 'https://musicbrainz.org'
         search_url = base_page + '/search?query=' + formatted_name + '&type=artist&method=indexed'
         results_page = requests.get(search_url, timeout = None)
@@ -192,18 +193,26 @@ class musicbrainzHandler:
             '//table[@class="tbl"]')[0].xpath('//tbody//tr//td//a')[0].values()[0]
         # artist_url almacena la página del priemr resultado
         self.artist_url = base_page + first_result
+        self.__fetch_data()
 
         
-        # Obtiene el árbol html de la pestaña Overview, Relationships y Tags
+    def __fetch_description(self):
+        wiki_page = requests.get(self.artist_url + '/wikipedia-extract', timeout = None)
+        self.wiki_extract = html.fromstring(wiki_page.content)
+
+        
+    def __fetch_data(self):
+        wiki_thread = Thread(target = self.__fetch_description)
+        wiki_thread.start()
+
         overview_page = requests.get(self.artist_url, timeout = None)
         self.overview = html.fromstring(overview_page.content)
         rel_page = requests.get(self.artist_url + '/relationships', timeout = None)
         self.relationships = html.fromstring(rel_page.content)
+        # Obtiene el árbol html de la pestaña Overview, Relationships y Tags
         tags_page = requests.get(self.artist_url + '/tags', timeout = None)
         self.tags = html.fromstring(tags_page.content)
-
-        wiki_page = requests.get(self.artist_url + '/wikipedia-extract', timeout = None)
-        self.wiki_extract = html.fromstring(wiki_page.content)
+        wiki_thread.join()
         
     """Scrapea la descripción del grupo"""
     def get_description(self):
