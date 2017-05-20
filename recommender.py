@@ -5,8 +5,6 @@
 Librería para cálculo de recomendaciones
 '''
 from datastore import *
-from threading import Thread
-import Queue
 
 def get_recommendations(values):
     queue = Queue.Queue()

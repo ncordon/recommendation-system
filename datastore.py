@@ -4,6 +4,8 @@
 from google.appengine.ext import ndb
 from gathering import *
 from fuzzywuzzy import fuzz
+from threading import Thread
+import Queue
 import pdb
 
 def to_utf8(string):
@@ -116,28 +118,63 @@ class DataStore:
         for album in query:
             songs = Song.query(Song.album_key == album.key.id())
         return songs
-    
-    
-    
+
+
+    """
+    Dado un album se introduce en la base de datos.
+    Metodo void.
+    El album y los argumentos se pasan en el método get_data_for y se suponen existentes.
+    """    
+    def thread_retrieve_songs_for(self, album, group_name, artist_key):
+        album_name = to_utf8(album['name'])
+        group_name = to_utf8(group_name)
+        video_id = youtube_handler.search_video(group_name + " " +
+                                                    album_name + " " + "full album")
+        album_key = self.create_album(album_name, "UNKNOWN", 0, 0000,
+                                          album["external_urls"]["spotify"],
+                                          video_id, int(artist_key.id()))
+        tracks = spotify_handler.album_tracks(album)
+        for track in tracks:
+            track_name = track["name"].encode("utf-8", "ignore")
+            self.create_song(track_name, float(track["duration_ms"]), 0,
+                                 track["external_urls"]["spotify"], int(album_key.id()),
+                                 bool(track["explicit"]))
+
+    """
+    Obtiene datos para el grupo pasado como argumento,
+    usando la API de spotify para realizarlo de forma
+    paralela a musicbrainz.
+    """    
+    def thread_retrieve_from_spotify_for(self, group_name, queue):    
+        artist = spotify_handler.get_artist_by_name(group_name)
+        queue.put(artist)
+
     """
     Obtiene datos para el grupo pasado como argumento,
     usando las APIs de spotify y youtube y scrapeando
     datos desde musicbrainz
     """
     def get_data_for(self, group_name):
+        queue = Queue.Queue()
         musicbrainz_handler = musicbrainzHandler(group_name)
-        # Obtenemos los datos aportados por spotify de un grupo
-        artist = spotify_handler.get_artist_by_name(group_name)
+        # Creamos una hebra para que Spotify trabaje en segundo plano mientras scrapeamos
     
+        spotify_thread = Thread(target = self.thread_retrieve_from_spotify_for, args = [group_name, queue, ])
+        spotify_thread.start()
+
         ###################################
         # Buscamos su canal de youtube
-        youtube_channel= youtube_handler.search_channel(group_name)
+        youtube_channel = youtube_handler.search_channel(group_name)
         ###################################
 
         description = musicbrainz_handler.get_description()
         actual_members = musicbrainz_handler.get_actual_members()
         former_members = musicbrainz_handler.get_former_members()
         tags = musicbrainz_handler.get_tags()
+
+        # Unimos la hebra de spotify y recojemos sus resultados
+        spotify_thread.join()
+        artist = queue.get()
         similar_groups = spotify_handler.spider_of_recommendations(artist["name"], 5)
         artist_key = self.create_group(artist["name"], description, artist["genres"],
                                        actual_members, former_members,
@@ -149,21 +186,15 @@ class DataStore:
         # Obtenemos todos los datos posibles de spotify de los albumes asociados al grupo anterior
         albums = spotify_handler.get_albums_by_artist(group_name)
         
-        
+        # Creamos una hebra por cada album del disco para examinarlos de forma paralela
+        threads = []
         for album in albums:
-            album_name = to_utf8(album['name'])
-            group_name = to_utf8(group_name)
-            video_id = youtube_handler.search_video(group_name + " " +
-                                                    album_name + " " + "full album")
-            album_key = self.create_album(album_name, "UNKNOWN", 0, 0000,
-                                          album["external_urls"]["spotify"],
-                                          video_id, int(artist_key.id()))
-            tracks = spotify_handler.album_tracks(album)
-            for track in tracks:
-                track_name = track["name"].encode("utf-8", "ignore")
-                self.create_song(track_name, float(track["duration_ms"]), 0,
-                                 track["external_urls"]["spotify"], int(album_key.id()),
-                                 bool(track["explicit"]))
+            threads.insert(0,Thread(target = self.thread_retrieve_songs_for, args = [album, group_name, artist_key, ]))
+            threads[0].start()
+
+        # Esperamos a que terminen todas las hebras
+        for thread in threads:
+            thread.join()
 
         return artist_key
 
