@@ -5,8 +5,6 @@
 Librería para cálculo de recomendaciones
 '''
 from datastore import *
-from threading import Thread
-import Queue
 
 total_recommendations = 30
 
