@@ -151,9 +151,9 @@ class DataStore:
     usando la API de spotify para realizarlo de forma
     paralela a musicbrainz.
     """    
-    def thread_retrieve_from_spotify_for(self, group_name, queue):    
+    def thread_retrieve_from_spotify_for(self, group_name, requests_queue):    
         artist = spotify_handler.get_artist_by_name(group_name)
-        queue.put(artist)
+        requests_queue.put(artist)
 
        
     """
@@ -196,7 +196,6 @@ class DataStore:
         # Creamos una hebra por cada album del disco para examinarlos de forma paralela
         threads = []
         for album in albums:
-<<<<<<< HEAD
             threads.insert(0,Thread(target = self.thread_retrieve_songs_for, args = [album, group_name, artist_key, ]))
             threads[0].start()
 
