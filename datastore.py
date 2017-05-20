@@ -54,7 +54,7 @@ class DataStore:
     Si no existe en base de datos, lo crea con get_data_for 
     y lo devuelve
     """
-    def thread_retrieve_data_for(self, group_name, queue):
+    def thread_retrieve_data_for(self, group_name, requests_queue):
         found = False
         groups = Group.query(projection = ['name']).iter()
 
@@ -69,8 +69,9 @@ class DataStore:
             group_key = self.get_data_for(group_name)
             artist = group_key.get()
 
-        queue.put(artist)    
+        requests_queue.put(artist)    
 
+    
     def retrieve_data_for(self, group_name):
         found = False
         groups = Group.query(projection = ['name']).iter()
@@ -93,18 +94,21 @@ class DataStore:
     Dicho grupo se supone que existe en la base de datos.
     """
     def get_albums(self, group_name):
-        query = Group.query(Group.name == group_name)
-        for artist in query:
-            albums = Album.query(Album.group_key == artist.key.id())
+        artist = (Group.query(Group.name == group_name)).get()
+        albums = []
+
+        if artist:
+          albums = Album.query(Album.group_key == artist.key)
+
         return albums
         
     
     """
     Obtiene la informacion de un album pasado como parámetro
     """
-    def get_album_data(self,album_id):
+    def get_album_data(self, album_name):
         #query = Album.query(Album.album_key == album_id)
-        query = Album.query(Album.name == album_id)
+        query = Album.query(Album.name == album_name)
         return query
     
     
@@ -112,11 +116,13 @@ class DataStore:
     Devuelve las canciones asociados al disco pasado como argumento.
     Dicho album se supone que existe en la base de datos.
     """
-    def get_songs(self,album_id):
-        #query = Album.query(Album.album_key == album_id)
-        query = Album.query(Album.name == album_id)
-        for album in query:
-            songs = Song.query(Song.album_key == album.key.id())
+    def get_songs(self, album_name):
+        album = Album.query(Album.name == album_name).get()
+        songs = []
+
+        if album:
+          songs = Song.query(Song.album_key == album.key)
+          
         return songs
 
 
@@ -149,6 +155,7 @@ class DataStore:
         artist = spotify_handler.get_artist_by_name(group_name)
         queue.put(artist)
 
+       
     """
     Obtiene datos para el grupo pasado como argumento,
     usando las APIs de spotify y youtube y scrapeando
@@ -189,6 +196,7 @@ class DataStore:
         # Creamos una hebra por cada album del disco para examinarlos de forma paralela
         threads = []
         for album in albums:
+<<<<<<< HEAD
             threads.insert(0,Thread(target = self.thread_retrieve_songs_for, args = [album, group_name, artist_key, ]))
             threads[0].start()
 
@@ -219,7 +227,7 @@ class Album(ndb.Model):
     genre = ndb.StringProperty()
     score = ndb.IntegerProperty()
     year = ndb.IntegerProperty()
-    group_key = ndb.IntegerProperty()
+    group_key = ndb.KeyProperty()
     spotify_url = ndb.StringProperty()
     video_url = ndb.StringProperty()
     
@@ -227,7 +235,7 @@ class Song(ndb.Model):
     name = ndb.StringProperty()
     duration = ndb.FloatProperty()
     score = ndb.IntegerProperty()
-    album_key = ndb.IntegerProperty()
+    album_key = ndb.KeyProperty()
     spotify_url = ndb.StringProperty()
     explicit = ndb.BooleanProperty()
 
