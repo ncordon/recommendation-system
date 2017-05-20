@@ -40,7 +40,7 @@ def recommend():
 
     
 @app.route("/<group_name>")
-def echo(group_name):
+def echo_group(group_name):
     group_name = normalize(group_name)
     try:
         artist = data_handler.retrieve_data_for(group_name)
@@ -50,11 +50,11 @@ def echo(group_name):
         return render_template("notFound.html", group_name = group_name)
 
 @app.route("/<group_name>/<album_name>")
-def echo3(group_name,album_name):
+def echo_album(group_name,album_name):
     album_name = normalize(album_name)
     albums = data_handler.get_album_data(album_name)
     songs = data_handler.get_songs(album_name)
-    return render_template("album.html",result = albums, songs= songs)
+    return render_template("album.html",result = albums, songs = songs)
 
 
 @app.errorhandler(404)
