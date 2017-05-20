@@ -138,12 +138,12 @@ class DataStore:
                                                     album_name + " " + "full album")
         album_key = self.create_album(album_name, "UNKNOWN", 0, 0000,
                                           album["external_urls"]["spotify"],
-                                          video_id, int(artist_key.id()))
+                                          video_id, artist_key)
         tracks = spotify_handler.album_tracks(album)
         for track in tracks:
             track_name = track["name"].encode("utf-8", "ignore")
             self.create_song(track_name, float(track["duration_ms"]), 0,
-                                 track["external_urls"]["spotify"], int(album_key.id()),
+                                 track["external_urls"]["spotify"], album_key,
                                  bool(track["explicit"]))
 
     """
