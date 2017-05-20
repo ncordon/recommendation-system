@@ -8,30 +8,28 @@ from datastore import *
 from threading import Thread
 import Queue
 
+total_recommendations = 30
+
 def get_recommendations(values):
-    queue = Queue.Queue()
-    thread1 = Thread(target = data_handler.thread_retrieve_data_for, args = [values[0], queue])
-    thread2 = Thread(target = data_handler.thread_retrieve_data_for, args = [values[1], queue])
-    thread3 = Thread(target = data_handler.thread_retrieve_data_for, args = [values[2], queue])
+    request_queue = Queue.Queue()
+    values = filter(None, values)
+    threads = []
     recommendations = []
     
-    thread1.start()
-    thread2.start()
-    thread3.start()
+    if len(values) > 0:
+        rec_per_group = total_recommendations/len(values)
+        
+    for i in range(len(values)): 
+        threads.append( Thread(target = data_handler.thread_retrieve_recommendations,
+                              args = [values[i], rec_per_group, request_queue]) )
+        threads[i].start()
 
-    thread1.join()
-    thread2.join()
-    thread3.join()
+    for thread in threads:
+        thread.join()
 
-    while not queue.empty():
-        artist = queue.get()
-        local_recommendations = artist.similar_groups
+    while not request_queue.empty():
+        local_recommendations = request_queue.get()
         recommendations = list(set().union(recommendations, local_recommendations))
 
-    """for value in values:
-        artist = data_handler.retrieve_data_for(value)
-
-        local_recommendations = artist.similar_groups
-        recommendations = list(set().union(recommendations, local_recommendations))
-    """
+    recommendations = list(set(recommendations) - set(values))
     return recommendations
