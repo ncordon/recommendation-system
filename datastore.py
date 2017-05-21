@@ -240,6 +240,11 @@ class DataStore:
         description = musicbrainz_handler.get_description()
         actual_members = musicbrainz_handler.get_actual_members()
         former_members = musicbrainz_handler.get_former_members()
+        
+        #Quitamos los valores repetidos de la lista
+        actual_members = list(set(actual_members))
+        former_members = list(set(former_members))
+        
         tags = musicbrainz_handler.get_tags()
 
         # Unimos la hebra de spotify y recojemos sus resultados
