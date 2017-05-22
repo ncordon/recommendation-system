@@ -1,0 +1,4 @@
+cron:
+- description: daily database update
+  url: /tasks/database/update
+  schedule: every 24 hours

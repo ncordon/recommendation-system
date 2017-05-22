@@ -292,12 +292,13 @@ class Group(ndb.Model):
     youtube_channel = ndb.StringProperty()
     tags = ndb.StringProperty( repeated = True )
     img = ndb.StringProperty()
-
+    last_update = ndb.DateTimeProperty( auto_now = True)
+    
 class Recommendation(ndb.Model):
     name = ndb.StringProperty( required = True )
     similar_groups = ndb.StringProperty( repeated = True )
     # auto_now hace que la fecha de creación/actualización se genere sola
-    last_update = ndb.DateTimeProperty( auto_now = True) 
+    last_update = ndb.DateTimeProperty( auto_now = True)
     
 class Album(ndb.Model):
     name = ndb.StringProperty( required = True )
@@ -307,6 +308,7 @@ class Album(ndb.Model):
     group_key = ndb.KeyProperty()
     spotify_url = ndb.StringProperty()
     video_url = ndb.StringProperty()
+    last_update = ndb.DateTimeProperty( auto_now = True)
     
 class Song(ndb.Model):
     name = ndb.StringProperty()
@@ -315,6 +317,6 @@ class Song(ndb.Model):
     album_key = ndb.KeyProperty()
     spotify_url = ndb.StringProperty()
     explicit = ndb.BooleanProperty()
-
+    last_update = ndb.DateTimeProperty( auto_now = True)
 
 data_handler = DataStore()

@@ -4,10 +4,12 @@
 <article>
   <h2>Recomendaciones para ti:</h2>
   <hr>
+  <table class="pure-table recommendation_table">
     {% for artist in recommendations %}
 
-    <p><a href='./{{artist}}'> {{ artist }} </a></p>
+    <tr><td><a href='./{{artist}}'> {{ artist }} </a></td></tr>
 
     {% endfor %}
+  </table>
 </article>
 {% endblock %}
