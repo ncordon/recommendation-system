@@ -169,7 +169,7 @@ class youtubeDataHandler:
                 video_url = "https://www.youtube.com/embed/" + id_video["videoId"]
             else:
                 if id_video["kind"] == "youtube#playlist":
-                    video_url = "https://www.youtube.com/playlist?list=" + id_video["playlistId"]
+                    video_url = "https://www.youtube.com/embed/?list=" + id_video["playlistId"]
         except Exception:
             pass
 
