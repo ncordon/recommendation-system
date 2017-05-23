@@ -2,9 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from google.appengine.ext import ndb
+from google.appengine.ext import deferred
 from gathering import *
 from fuzzywuzzy import fuzz
+from datetime import datetime
 
+group_update_freq = 5
 
 """ 
 Método para convertir strings a utf8 
@@ -110,6 +113,19 @@ class DataStore:
                 self.create_recommendation(group_name, current_similar)            
                 request_queue.put(current_similar)
 
+
+
+    def __group_needs_update(self, group):
+        return (datetime.utcnow() - group.last_update).days >= group_update_freq
+
+
+    def cascade_delete(self, group_key):
+        album_keys = Album.query( Album.group_key == group_key).fetch(keys_only = True)
+        song_keys = Song.query( Song.album_key.IN(album_keys) ).fetch(keys_only = True)
+        ndb.delete_multi(song_keys + album_keys + [group_key])
+
+      
+    
     """
     Devuelve un grupo en caso de que exista en base de datos 
     o se pueda recuperar información de él desde todas las 
@@ -123,13 +139,17 @@ class DataStore:
     def retrieve_data_for(self, group_name):
         groups = Group.query(projection = ['name']).iter()
         most_similar = self.__more_similar_from_to(groups, group_name)
-
+        needs_update = False
+        
         if most_similar:
-            artist = most_similar.key.get()
-        else:
+            artist = most_similar.key.get()  
+            needs_update = self.__group_needs_update(artist)
+        if not most_similar or needs_update:     
             group_key = self.get_data_for(group_name)
             artist = group_key.get()
-        
+            if needs_update:
+                deferred.defer(self.cascade_delete, most_similar.key)
+            
         return artist
 
       
@@ -148,7 +168,7 @@ class DataStore:
 
         if artist:
           albums = Album.query(Album.group_key == artist.key)
-
+          
         return albums
         
     
@@ -267,6 +287,7 @@ Modelos de la base de datos
 """
 class Group(ndb.Model):
     name = ndb.StringProperty( required = True )
+    year = ndb.IntegerProperty()
     description = ndb.TextProperty()
     genre = ndb.StringProperty( repeated = True )
     actual_members = ndb.StringProperty( repeated = True )

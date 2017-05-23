@@ -3,18 +3,33 @@ api_version: 1
 threadsafe: true
 
 handlers:
-- url: /static
-  static_dir: static
+ - url: /static
+   static_dir: static
 
-- url: /.*
-  script: main.app
+ - url: /tasks/.*
+   script: admin-tasks.app
+   # Makes the url private to outside world
+   login: admin
+   
+ - url: /.*
+   script: main.app
+
+ - url: /_ah/queue/deferred
+   script: google.appengine.ext.deferred.deferred.application
+   login: admin
+
 
 libraries:
 - name: ssl
   version: latest
 - name: lxml
   version: 2.3.5
-  
+
+
+builtins:
+- deferred: on  
+
+
 env_variables:
   SPOTIPY_CLIENT_ID: ${SPOTIPY_CLIENT_ID}
   SPOTIPY_CLIENT_SECRET: ${SPOTIPY_CLIENT_SECRET}

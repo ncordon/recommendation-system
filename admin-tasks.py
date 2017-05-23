@@ -11,15 +11,13 @@ app = Flask(__name__)
 @app.route("/tasks/database/update")
 def database_update():
     msg = 'Tareas de actualización de la base de datos'
-
-    checking = False
     admin_update_proc() 
     
     ## Añadir aquí la llamada al procedimiento de actualización
     
-    if checking:
+    try:
         response = make_response(msg + ' realizadas correctamente')
-    else:
+    except Exception:
         response = make_response((msg + ' fallidas', 500))
 
     return response
