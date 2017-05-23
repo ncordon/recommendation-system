@@ -2,8 +2,7 @@
 {% block title %}Info{% endblock %}
 {% block body %}
 <article>
-  <h2>Error: El grupo no se ha encontrado</h2>
+  <h2>Error: {{msg}}</h2>
   <hr>
-  <p>El grupo o alguno de los grupos "{{ group_name }}" que está buscando no existen en nuestra base de datos y además no podemos encontrar información de él a través de nuestras fuentes.</p>
 </article>
 {% endblock %}

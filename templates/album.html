@@ -1,7 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}Album{% endblock %}
 {% block body %}
-    {% for album in result%}
     <h3 class="group-name">{{album.name}}</h3>
     <p><iframe width="560" height="315" src='{{album.video_url}}' frameborder="0" allowfullscreen></iframe>
     </p>
@@ -29,5 +28,4 @@
         </td>
       </tr>
     </table>
-    {% endfor %}
 {% endblock %}

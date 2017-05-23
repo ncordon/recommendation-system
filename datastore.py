@@ -10,21 +10,54 @@ from datetime import datetime
 
 group_update_freq = 5
 
-""" 
-Método para convertir strings a utf8 
+
+"""
+Método para convertir strings a utf8
 
 Args:
    string (str): string a convertir a utf8
 """
 def to_utf8(string):
-  return string.encode("utf-8", "ignore")
+    return string.encode("utf-8", "ignore")
 
 
 
 class DataStore:
     """
+    Método para calcular si un resultado es lo suficientemente similar de
+    entre los de una query, respecto a un target
+
+       Comprueba si el valor de 'name' para algún elemento de query es
+       lo suficientemente similar a target, y devuelve el más similar
+
+       Caso de que no haya uno suficientement similar, devuelve None
+
+    Args:
+        query(ndb.query): query tal que los objetos tienen el atributo name
+        target(str): nombre al que queremos asemejarnos
+    """
+    def __more_similar_from_to(self, query, target):
+        max_similarity = 0
+        result = None
+        query = query.iter()
+
+        while query.has_next():
+            stored = query.next()
+            # Calcula la medida de similaridad con el target
+            current_similarity = fuzz.ratio(stored.name.lower(), target.lower())
+
+            if current_similarity >= 80 and current_similarity > max_similarity:
+                max_similarity = current_similarity
+                result = stored
+
+        return result
+
+
+    """
     Crea un grupo en base de datos con los parámetros pasados
-    Devuelve la key del grupo creado
+
+    Return:
+        group_key: key del grupo creado
     """
     def create_group(self, name, description, genre, actual_members, former_members,
                      score, area, begin_year, spotify_url, spotify_followers,
@@ -67,156 +100,147 @@ class DataStore:
         return recommendation_key
 
     """
-    Método para calcular si un resultado es lo suficientemente similar de 
-    entre los de una query, respecto a un target
+    Método para obtener recomendaciones a partir de la API de Spotify
 
-       Comprueba si el valor de 'name' para algún elemento de query es 
-       lo suficientemente similar a target, y devuelve el más similar
-
-       Caso de que no haya uno suficientement similar, devuelve None
-    """
-    def __more_similar_from_to(self, query, target):
-        max_similarity = 0
-        result = None
-        
-        while query.has_next():
-            stored = query.next()
-            # Calcula la medida de similaridad con el target
-            current_similarity = fuzz.ratio(stored.name.lower(), target.lower())
-            
-            if current_similarity >= 80 and current_similarity > max_similarity:
-                max_similarity = current_similarity
-                result = stored
-
-        return result
-      
-    """
-    Método paralelizado para obtener recomendaciones a partir de la API de Spotify
-    
     Args:
-       group_name (str): nombre del grupo para el que calcular la recomendación
+       group_name (str): grupo para el que recomendar
        n_recommendations(int): número de recomendaciones a obtener
        request_queue (Queue): cola de peticiones paralelizadas donde escribir el resultado
     """
-    def thread_retrieve_recommendations(self, group_name, n_recommendations, request_queue):
-        groups = Recommendation.query(projection = ['name']).iter()
-        
+    def retrieve_recommendations(self, group_name, n_recommendations, request_queue):
+        groups = Recommendation.query(projection = ['name'])
+
         most_similar = self.__more_similar_from_to(groups, group_name)
-        
+
         # Si existe un grupo de nombre lo suficientemente parecido en base de datos
         if most_similar:
             # Se comprueba si esta en la caché
-            data = memcache.get('{}:recommendations'.format(group_name))
-            if data is not None:
+            maybe_cached = '{}:recommendations'.format(most_similar)
+            data = memcache.get(maybe_cached)
+
+            if data:
                 request_queue.put(data)
+            # Si no lo está
             else:
                 most_similar = most_similar.key.get()
                 # Se mete en caché
-                memcache.add('{}:recommendations'.format(group_name),most_similar.similar_groups)
+                memcache.add(maybe_cached, most_similar.similar_groups)
                 request_queue.put(most_similar.similar_groups)
         else:
+            # Caso opuesto, se scrapea la información para ellos
             current_similar = spotify_handler.spider_of_recommendations(group_name,
                                                                         n_recommendations)
             if current_similar:
-                self.create_recommendation(group_name, current_similar)            
-                memcache.add('{}:recommendations'.format(group_name),current_similar)
+                self.create_recommendation(group_name, current_similar)
+                memcache.add('{}:recommendations'.format(group_name), current_similar)
                 request_queue.put(current_similar)
 
 
+    """
+    Borra toda la información en BD para un grupo
 
-    def __group_needs_update(self, group):
-        return (datetime.utcnow() - group.last_update).days >= group_update_freq
-
-
-    def cascade_delete(self, group_key):
+    Args:
+        group_key (ndb.key): key del grupo
+    """
+    def __cascade_delete(self, group_key):
         album_keys = Album.query( Album.group_key == group_key).fetch(keys_only = True)
         song_keys = Song.query( Song.album_key.IN(album_keys) ).fetch(keys_only = True)
         ndb.delete_multi(song_keys + album_keys + [group_key])
 
-      
-    
+
+
     """
-    Devuelve un grupo en caso de que exista en base de datos 
-    o se pueda recuperar información de él desde todas las 
-    fuentes de datos
-       Si existe
+    Devuelve un grupo en caso de que se pueda recuperar información sobre él
+       Si existe un grupo similar en base de datos y no necesita actualización,
+          Lo devuelve
+       Caso opuesto,
+          Scrapea o actualiza la información para el grupo
+          Si lo ha actualizado,
+              Borra el anterior asíncronamente
+
 
     Args:
        group_name (str): nombre del grupo
-       
+
     """
     def retrieve_data_for(self, group_name):
-        groups = Group.query(projection = ['name']).iter()
+        groups = Group.query(projection = ['name'])
         most_similar = self.__more_similar_from_to(groups, group_name)
         needs_update = False
-        
+
         if most_similar:
-            artist = most_similar.key.get()  
-            needs_update = self.__group_needs_update(artist)
-        if not most_similar or needs_update:     
+            artist = most_similar.key.get()
+            needs_update = (datetime.utcnow() - artist.last_update).days >= group_update_freq
+        if not most_similar or needs_update:
             group_key = self.get_data_for(group_name)
             artist = group_key.get()
             if needs_update:
-                deferred.defer(self.cascade_delete, most_similar.key)
-            
+                deferred.defer(self.__cascade_delete, most_similar.key)
+
         return artist
 
-      
+
     """
     Devuelve los albums asociados al grupo pasado como argumento.
     Dicho grupo se supone que existe en la base de datos.
 
     Args:
-       group_name (str): nombre del grupo
+        group_name (str): nombre del grupo
     Returns:
-       albums
+        albums
     """
-    def get_albums(self, group_name):
+    def get_albums_by(self, group_name):
         artist = (Group.query(Group.name == group_name)).get()
         albums = []
 
         if artist:
           albums = Album.query(Album.group_key == artist.key)
-          
+
         return albums
-        
-    
+
+
     """
     Obtiene la informacion de un album pasado su nombre como parámetro
 
     Args:
        album_name (str): nombre del grupo
-    
+
     """
-    def get_album_data(self, album_name):
-        query = Album.query(Album.name == album_name)
-        return query
-    
-    
+    def get_album(self, album_name):
+        album = (Album.query(Album.name == album_name)).get()
+
+        if not album:
+            raise NameError
+
+        return album
+
+
     """
     Devuelve las canciones asociados al disco pasado como argumento.
     Dicho album se supone que existe en la base de datos.
-    
+
     Args:
-       album_name (str): nombre del grupo
+       album (ndb.Album): grupo
 
     """
-    def get_songs(self, album_name):
-        album = Album.query(Album.name == album_name).get()
+    def get_songs(self, album):
         songs = []
 
         if album:
           songs = Song.query(Song.album_key == album.key)
-          
+
         return songs
 
 
     """
-    Dado un album se introduce en la base de datos.
-    Metodo void.
-    El album y los argumentos se pasan en el método get_data_for y se suponen existentes.
-    """    
-    def retrieve_songs_for(self, album, group_name, artist_key):
+    Scrapea las canciones para un album pasado como argumento
+
+    Args:
+        album (ndb.Album)
+        group_name (str): Nombre del grupo
+        artist_key (ndb.key): key del grupo en BD
+    """
+    def __retrieve_songs_for(self, album, group_name, artist_key):
         album_name = to_utf8(album['name'])
         group_name = to_utf8(group_name)
         video_id = youtube_handler.search_video(group_name + " " +
@@ -224,8 +248,10 @@ class DataStore:
         album_key = self.create_album(album_name, "UNKNOWN", 0, 0000,
                                       album["external_urls"]["spotify"],
                                       video_id, artist_key)
+        # Obtiene canciones usando la API de spotify
         tracks = spotify_handler.album_tracks(album)
-        
+
+        # Mete cada una de esas canciones en BD
         for track in tracks:
             track_name = track["name"].encode("utf-8", "ignore")
             self.create_song(track_name, float(track["duration_ms"]), 0,
@@ -233,38 +259,46 @@ class DataStore:
                                  bool(track["explicit"]))
 
     """
-    Obtiene datos para el grupo pasado como argumento,
-    usando la API de spotify para realizarlo de forma
-    paralela a musicbrainz.
-    """    
-    def retrieve_from_apis_for(self, group_name, results):    
+    Obtiene datos para el grupo pasado como argumento.
+
+    Args:
+        group_name (str): nombre del grupo
+        results ({}): diccionario donde guardar los resultados
+
+    """
+    def __retrieve_from_apis_for(self, group_name, results):
         results['artist'] = spotify_handler.get_artist_by_name(group_name)
         # Obtenemos todos los datos posibles de spotify de los albumes asociados al grupo anterior
-        results['albums'] = spotify_handler.get_albums_by_artist(group_name)       
+        results['albums'] = spotify_handler.get_albums_by_artist(group_name)
         # Buscamos su canal de youtube
         results['youtube_channel'] = youtube_handler.search_channel(group_name)
 
-       
+
     """
-    Obtiene datos para el grupo pasado como argumento,
-    usando las APIs de spotify y youtube y scrapeando
-    datos desde musicbrainz
+    Obtiene datos para el grupo pasado como argumento, y los integra
+    Usa las APIs de spotify y youtube y scrapeando datos desde musicbrainz
+
+    Args:
+        group_name (str): nombre del grupo para el que obtener datos
+
+    Return:
+        artist_key (ndb.Key): key del artista en BD
     """
     def get_data_for(self, group_name):
         results = {}
         # Creamos una hebra para que Spotify trabaje en segundo plano mientras scrapeamos
-        apis_thread = Thread(target = self.retrieve_from_apis_for, args = [group_name, results])
+        apis_thread = Thread(target = self.__retrieve_from_apis_for, args = [group_name, results])
         apis_thread.start()
 
         musicbrainz_handler = musicbrainzHandler(group_name)
         description = musicbrainz_handler.get_description()
         actual_members = musicbrainz_handler.get_actual_members()
         former_members = musicbrainz_handler.get_former_members()
-        
+
         #Quitamos los valores repetidos de la lista
         actual_members = list(set(actual_members))
         former_members = list(set(former_members))
-        
+
         tags = musicbrainz_handler.get_tags()
 
         # Unimos la hebra de spotify y recojemos sus resultados
@@ -279,12 +313,12 @@ class DataStore:
                                        artist["external_urls"]["spotify"],
                                        int(artist["followers"]["total"]),
                                        youtube_channel, tags,artist["images"][0]['url'])
-        
+
         # Creamos una hebra por cada album del disco para examinarlos de forma paralela
         threads = []
-        
+
         for i in range(len(albums)):
-            threads.append(Thread(target = self.retrieve_songs_for,
+            threads.append(Thread(target = self.__retrieve_songs_for,
                                   args = [albums[i], group_name, artist_key, ]))
             threads[i].start()
 
@@ -295,8 +329,8 @@ class DataStore:
         return artist_key
 
 
-""" 
-Modelos de la base de datos 
+"""
+Modelos de la base de datos
 """
 class Group(ndb.Model):
     name = ndb.StringProperty( required = True )
@@ -314,13 +348,13 @@ class Group(ndb.Model):
     tags = ndb.StringProperty( repeated = True )
     img = ndb.StringProperty()
     last_update = ndb.DateTimeProperty( auto_now = True)
-    
+
 class Recommendation(ndb.Model):
     name = ndb.StringProperty( required = True )
     similar_groups = ndb.StringProperty( repeated = True )
     # auto_now hace que la fecha de creación/actualización se genere sola
     last_update = ndb.DateTimeProperty( auto_now = True)
-    
+
 class Album(ndb.Model):
     name = ndb.StringProperty( required = True )
     genre = ndb.StringProperty()
@@ -330,7 +364,7 @@ class Album(ndb.Model):
     spotify_url = ndb.StringProperty()
     video_url = ndb.StringProperty()
     last_update = ndb.DateTimeProperty( auto_now = True)
-    
+
 class Song(ndb.Model):
     name = ndb.StringProperty()
     duration = ndb.FloatProperty()

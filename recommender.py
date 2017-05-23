@@ -13,12 +13,12 @@ def get_recommendations(values):
     values = filter(None, values)
     threads = []
     recommendations = []
-    
+
     if len(values) > 0:
         rec_per_group = total_recommendations/len(values)
-        
-    for i in range(len(values)): 
-        threads.append( Thread(target = data_handler.thread_retrieve_recommendations,
+
+    for i in range(len(values)):
+        threads.append( Thread(target = data_handler.retrieve_recommendations,
                               args = [values[i], rec_per_group, request_queue]) )
         threads[i].start()
 

@@ -13,13 +13,16 @@ def normalize(arg):
     # with "Porcupine%20Tree"
     return arg.replace("%20", " ")
 
+
 @app.route("/about")
 def about():
     return render_template("about.html")
 
+
 @app.route("/")
 def recommendation():
     return render_template("ask-recommendation.html")
+
 
 @app.route("/answer-recommendation", methods = ["POST","GET"])
 def recommend():
@@ -33,32 +36,42 @@ def recommend():
             recommendations = get_recommendations(values)
             return render_template("table.html", recommendations = recommendations)
         except Exception:
-            return render_template("notFound.html", group_name = str(values))
+            return render_template("notFound.html", msg =
+                                   str("Lo sentimos, no disponemos de información para esos grupos"))
     else:
         return render_template("ask-recommendation.html")
 
-    
+
 @app.route("/<group_name>")
 def echo_group(group_name):
     group_name = normalize(group_name)
+
     try:
         artist = data_handler.retrieve_data_for(group_name)
-        albums = data_handler.get_albums(artist.name)
+        albums = data_handler.get_albums_by(artist.name)
         return render_template("artist.html", artist = artist, albums = albums)
     except Exception:
-        return render_template("notFound.html", group_name = group_name)
+        return render_template("notFound.html", msg =
+                               str("Desafortunadamente no encontramos el grupo que buscas"))
+
 
 @app.route("/<group_name>/<album_name>")
-def echo_album(group_name,album_name):
-    album_name = normalize(album_name)
-    albums = data_handler.get_album_data(album_name)
-    songs = data_handler.get_songs(album_name)
-    return render_template("album.html",result = albums, songs = songs)
+def echo_album(group_name, album_name):
+
+    try:
+        album_name = normalize(album_name)
+        album = data_handler.get_album(album_name)
+        songs = data_handler.get_songs(album)
+        return render_template("album.html", album = album, songs = songs)
+    except Exception:
+        return render_template("notFound.html", msg =
+                               str("Lo sentimos, no encontramos el álbum que buscas"))
 
 
 @app.errorhandler(404)
 def not_found(error):
     return render_template("404.html"), 404
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', threaded=True)
