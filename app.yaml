@@ -7,10 +7,10 @@ handlers:
    static_dir: static
 
  - url: /tasks/.*
-   script: admin-tasks.app
+   script: admin_tasks.app
    # Makes the url private to outside world
    login: admin
-   
+
  - url: /.*
    script: main.app
 
@@ -27,12 +27,10 @@ libraries:
 
 
 builtins:
-- deferred: on  
+- deferred: on
 
 
 env_variables:
   SPOTIPY_CLIENT_ID: ${SPOTIPY_CLIENT_ID}
   SPOTIPY_CLIENT_SECRET: ${SPOTIPY_CLIENT_SECRET}
   YOUTUBE_DEV_KEY: ${YOUTUBE_DEV_KEY}
-
-  

@@ -4,22 +4,18 @@
 from flask import *
 from google.appengine.ext import ndb
 import requests
-from database-tasks import *
+from database_tasks import *
 
 app = Flask(__name__)
 
 @app.route("/tasks/database/update")
-def database-update():
-    msg = 'Tareas de actualización de la base de datos'
-
-    checking = False
-    data_handler.create_recommendation("Prueba", ["Prueba", "Prueba"])
+def database_update():
+    msg = 'Tareas de actualizacion de la base de datos'
+    admin_update_proc() 
     
-    ## Añadir aquí la llamada al procedimiento de actualización
-    
-    if checking:
+    try:
         response = make_response(msg + ' realizadas correctamente')
-    else:
+    except Exception:
         response = make_response((msg + ' fallidas', 500))
 
     return response
