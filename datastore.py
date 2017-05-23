@@ -3,6 +3,7 @@
 
 from google.appengine.ext import ndb
 from google.appengine.ext import deferred
+from google.appengine.api import memcache
 from gathering import *
 from fuzzywuzzy import fuzz
 from datetime import datetime
@@ -104,13 +105,21 @@ class DataStore:
         
         # Si existe un grupo de nombre lo suficientemente parecido en base de datos
         if most_similar:
-            most_similar = most_similar.key.get() 
-            request_queue.put(most_similar.similar_groups)
+            # Se comprueba si esta en la caché
+            data = memcache.get('{}:recommendations'.format(group_name))
+            if data is not None:
+                request_queue.put(data)
+            else:
+                most_similar = most_similar.key.get()
+                # Se mete en caché
+                memcache.add('{}:recommendations'.format(group_name),most_similar.similar_groups)
+                request_queue.put(most_similar.similar_groups)
         else:
             current_similar = spotify_handler.spider_of_recommendations(group_name,
                                                                         n_recommendations)
             if current_similar:
                 self.create_recommendation(group_name, current_similar)            
+                memcache.add('{}:recommendations'.format(group_name),current_similar)
                 request_queue.put(current_similar)
 
 
@@ -180,7 +189,6 @@ class DataStore:
     
     """
     def get_album_data(self, album_name):
-        #query = Album.query(Album.album_key == album_id)
         query = Album.query(Album.name == album_name)
         return query
     
@@ -252,6 +260,11 @@ class DataStore:
         description = musicbrainz_handler.get_description()
         actual_members = musicbrainz_handler.get_actual_members()
         former_members = musicbrainz_handler.get_former_members()
+        
+        #Quitamos los valores repetidos de la lista
+        actual_members = list(set(actual_members))
+        former_members = list(set(former_members))
+        
         tags = musicbrainz_handler.get_tags()
 
         # Unimos la hebra de spotify y recojemos sus resultados
