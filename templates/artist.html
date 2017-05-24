@@ -6,6 +6,18 @@
   <h4>Descripción:</h4>
   <p>{{artist.description}}</p>
   <table class="pure-table group_table">
+    {% if artist.members %}
+    <tr class="pure-table-odd">
+      <td>Miembros:</td>
+      <td>
+        <ul>
+        {% for member in artist.members %}
+          <li>{{ member.name }} {{member.time_interval}}</li>
+        {% endfor %}
+        </ul>
+      </td>
+    </tr>
+    {% endif %}
     <tr>
       <td>Géneros:</td>
       <td>
@@ -17,20 +29,10 @@
       </td>
     </tr>
     <tr class="pure-table-odd">
-      <td>Miembros:</td>
-      <td>
-        <ul>
-          {% for member in artist.members %}
-            <li>{{ member.name }} {{member.time_interval}}</li>
-          {% endfor %}
-        </ul>
-      </td>
-    </tr>
-    <tr>
       <td>Canal de Youtube:</td>
       <td><a href='{{artist.youtube_channel}}'> {{ artist.youtube_channel }}</a></td>
     </tr>
-    <tr class="pure-table-odd">
+    <tr>
       <td>Canal de Spotify:</td>
       <td><a href='{{ artist.spotify_url }}'>{{artist.spotify_url}}</a></td>
     </tr>
