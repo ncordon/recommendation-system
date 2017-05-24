@@ -1,16 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''
+"""
 Librería para la recolección de datos a través de las API de Spotify y youtube
-'''
+"""
 import spotipy
-import spotipy.util as util
-import re
 import os
 from spotipy.oauth2 import SpotifyClientCredentials
 from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 from lxml import html
 import requests
 from threading import Thread
@@ -49,7 +46,7 @@ class spotifyDataHandler:
             album = results['albums']['items'][0]
         except Exception:
             pass
-        
+
         return album
 
     '''
@@ -70,7 +67,7 @@ class spotifyDataHandler:
             albums.sort(key=lambda album:album['name'].lower())
         except Exception:
             pass
-        
+
         return albums
 
     '''
@@ -101,10 +98,10 @@ class spotifyDataHandler:
                                                    [self.get_artist_by_name(name)['id']])
         except Exception:
             pass
-        
+
         return results
 
-    
+
     '''
     Método para obtener recomendaciones en forma de árbol a partir del nombre de un artista.
     '''
@@ -116,7 +113,7 @@ class spotifyDataHandler:
 
         while len(result) < limitlen and not finished and recommend_queue:
             recommended = self.recommendation_by_artist( recommend_queue.get() )
-            
+
             if recommended:
                 recommended = set([track['artists'][0]['name'] for track in recommended['tracks']])
                 recommended = recommended - set(result)
@@ -141,7 +138,7 @@ class youtubeDataHandler:
         self.youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
                              developerKey = DEVELOPER_KEY)
 
-   
+
     '''Metodo para obtener el id de los videos'''
     def search_channel(self, query):
         search_response = self.youtube.search().list(q = query, part = "id", type = "channel",
@@ -156,7 +153,7 @@ class youtubeDataHandler:
             pass
 
         return channel_url
-    
+
     '''Metodo para obtener el id de los videos'''
     def search_video(self, query):
         search_response = self.youtube.search().list(q = query, part = "id,snippet").execute()
@@ -164,7 +161,7 @@ class youtubeDataHandler:
 
         try:
             id_video = search_response["items"][0]["id"]
-            
+
             if id_video["kind"] == "youtube#video":
                 video_url = "https://www.youtube.com/embed/" + id_video["videoId"]
             else:
@@ -174,12 +171,12 @@ class youtubeDataHandler:
             pass
 
         return video_url
-        
 
 
 
 
-class musicbrainzHandler:
+
+class musicBrainzHandler:
     def __init__(self, group_name):
         self.group_name = group_name
         # Calcula el nombre concatenando partes separadas por espacio por un +
@@ -195,12 +192,12 @@ class musicbrainzHandler:
         self.artist_url = base_page + first_result
         self.__fetch_data()
 
-        
+
     def __fetch_description(self):
         wiki_page = requests.get(self.artist_url + '/wikipedia-extract', timeout = None)
         self.wiki_extract = html.fromstring(wiki_page.content)
 
-        
+
     def __fetch_data(self):
         wiki_thread = Thread(target = self.__fetch_description)
         wiki_thread.start()
@@ -213,7 +210,7 @@ class musicbrainzHandler:
         tags_page = requests.get(self.artist_url + '/tags', timeout = None)
         self.tags = html.fromstring(tags_page.content)
         wiki_thread.join()
-        
+
     """Scrapea la descripción del grupo"""
     def get_description(self):
         description = ""
@@ -223,36 +220,27 @@ class musicbrainzHandler:
             )[0].text_content()
         except Exception:
             pass
-        
+
         return description.encode("ISO-8859-1", "ignore").decode('utf8')
 
 
-    def __get_members(self, actual):
-        if(actual):
-            index = 0
-        else:
-            index = 1
-
-        member_list = []
+    """Scrapea miembros actuales del grupo"""
+    def get_members(self):
+        member_list = [] #{'name':[], 'year':[]}
 
         try:
-            members = self.relationships.xpath('//table[@class="details"]')[0]
-            member_tags = members[index].xpath('td//a//bdi')
-            member_list = [ m.text_content() for m in member_tags ]
+           members = self.relationships.xpath(
+                '//table[@class="details" and (.//th="members:" or .//th="original members:")]')
+
+           if members:
+                member_names = members[0].xpath('.//td//a//bdi//text()')
+                member_years = members[0].xpath('.//text()[following-sibling::br]')
+                member_years = filter(None, map(lambda x: x.strip("[] \n"), member_years))
+                member_list = zip(member_names, member_years)
         except IndexError:
             pass
 
         return member_list
-
-    
-    """Scrapea miembros actuales del grupo"""
-    def get_actual_members(self):
-        return (self.__get_members(True))
-
-        
-    """Scrapea miembros antiguos del grupo"""
-    def get_former_members(self):
-        return (self.__get_members(False))
 
 
     """Scrapea lista de álbumes del grupo"""
@@ -266,10 +254,10 @@ class musicbrainzHandler:
                             for a in category.getchildren() ]
         except Exception:
             pass
-        
+
         return albums
 
-    
+
     """Scrapea tags para el grupo"""
     def get_tags(self):
         tags = []
@@ -279,11 +267,11 @@ class musicbrainzHandler:
                      self.tags.xpath('//div[@id="all-tags"]')[0][0].getchildren() ]
         except Exception:
             pass
-        
+
         return tags
 
-    
-    
+
+
 spotify_handler = spotifyDataHandler()
 youtube_handler = youtubeDataHandler()
 

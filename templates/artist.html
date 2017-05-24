@@ -20,8 +20,8 @@
       <td>Miembros:</td>
       <td>
         <ul>
-          {% for member in artist.actual_members %}
-            <li>{{ member }}</li>
+          {% for member in artist.members %}
+            <li>{{ member.name }}, {{member.year}}</li>
           {% endfor %}
         </ul>
       </td>
@@ -46,5 +46,3 @@
     </tr>
   </table>
 {% endblock %}
-
- 

@@ -36,7 +36,7 @@ class DataStore:
         query(ndb.query): query tal que los objetos tienen el atributo name
         target(str): nombre al que queremos asemejarnos
     """
-    def __more_similar_from_to(self, query, target):
+    def __most_similar_from_to(self, query, target):
         max_similarity = 0
         result = None
         query = query.iter()
@@ -59,11 +59,9 @@ class DataStore:
     Return:
         group_key: key del grupo creado
     """
-    def create_group(self, name, description, genre, actual_members, former_members,
-                     score, area, begin_year, spotify_url, spotify_followers,
-                     youtube_channel, tags, img):
-        group = Group(name = name, description = description, genre = genre,
-                      actual_members = actual_members, former_members = former_members,
+    def create_group(self, name, description, genre, members, score, area, begin_year,
+                     spotify_url, spotify_followers, youtube_channel, tags, img):
+        group = Group(name = name, description = description, genre = genre, members = members,
                       score = score, begin_year = begin_year, area = area,
                       spotify_url = spotify_url, spotify_followers = spotify_followers,
                       youtube_channel = youtube_channel, tags = tags,img = img)
@@ -72,7 +70,10 @@ class DataStore:
 
     """
     Crea una canción en base de datos con los parámetros pasados
-    Devuelve la key de la canción creada
+
+    Return:
+        album_key: key del grupo creado
+
     """
     def create_song(self, name, duration, score, spotify_url, album_key, explicit):
         song = Song(name = name, duration = duration, score = score,
@@ -82,7 +83,10 @@ class DataStore:
 
     """
     Crea un álbum con los parámetros pasados
-    Devuelve la key del álbum creado
+
+    Return:
+        album_key: key del álbum creado
+
     """
     def create_album(self, name, genre, score, year, spotify_url,video_url,group_key):
         album = Album(name = name, genre = genre, score = score, year = year,
@@ -92,7 +96,10 @@ class DataStore:
 
     """
     Crea una recomendación en base de datos
-    Devuelve la key de la recomendación creada
+
+    Return:
+        recommendation_key: key de la rcomendación creada
+
     """
     def create_recommendation(self, name, similar_groups):
         recommendation = Recommendation(name = name, similar_groups = similar_groups)
@@ -110,7 +117,7 @@ class DataStore:
     def retrieve_recommendations(self, group_name, n_recommendations, request_queue):
         groups = Recommendation.query(projection = ['name'])
 
-        most_similar = self.__more_similar_from_to(groups, group_name)
+        most_similar = self.__most_similar_from_to(groups, group_name)
 
         # Si existe un grupo de nombre lo suficientemente parecido en base de datos
         if most_similar:
@@ -165,7 +172,7 @@ class DataStore:
     """
     def retrieve_data_for(self, group_name):
         groups = Group.query(projection = ['name'])
-        most_similar = self.__more_similar_from_to(groups, group_name)
+        most_similar = self.__most_similar_from_to(groups, group_name)
         needs_update = False
 
         if most_similar:
@@ -290,14 +297,11 @@ class DataStore:
         apis_thread = Thread(target = self.__retrieve_from_apis_for, args = [group_name, results])
         apis_thread.start()
 
-        musicbrainz_handler = musicbrainzHandler(group_name)
+        musicbrainz_handler = musicBrainzHandler(group_name)
         description = musicbrainz_handler.get_description()
-        actual_members = musicbrainz_handler.get_actual_members()
-        former_members = musicbrainz_handler.get_former_members()
+        members = musicbrainz_handler.get_members()
 
-        #Quitamos los valores repetidos de la lista
-        actual_members = list(set(actual_members))
-        former_members = list(set(former_members))
+        members = map(lambda m: GroupMember(m[0], m[1]), members)
 
         tags = musicbrainz_handler.get_tags()
 
@@ -307,8 +311,7 @@ class DataStore:
         albums = results['albums']
         youtube_channel = results['youtube_channel']
 
-        artist_key = self.create_group(artist["name"], description, artist["genres"],
-                                       actual_members, former_members,
+        artist_key = self.create_group(artist["name"], description, artist["genres"], members,
                                        int(artist["popularity"]), "UNKNOWN", 0000,
                                        artist["external_urls"]["spotify"],
                                        int(artist["followers"]["total"]),
@@ -332,13 +335,16 @@ class DataStore:
 """
 Modelos de la base de datos
 """
+class GroupMember(ndb.Model):
+    name = ndb.StringProperty( required = True)
+    years = ndb.StringProperty()
+
 class Group(ndb.Model):
     name = ndb.StringProperty( required = True )
     year = ndb.IntegerProperty()
     description = ndb.TextProperty()
     genre = ndb.StringProperty( repeated = True )
-    actual_members = ndb.StringProperty( repeated = True )
-    former_members = ndb.StringProperty( repeated = True )
+    members = ndb.StructuredProperty( GroupMember, repeated=True )
     score = ndb.IntegerProperty()
     area = ndb.StringProperty()
     begin_year = ndb.IntegerProperty()
