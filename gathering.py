@@ -12,7 +12,7 @@ from lxml import html
 import requests
 from threading import Thread
 import Queue
-import pdb
+import re
 
 class spotifyDataHandler:
 
@@ -226,21 +226,38 @@ class musicBrainzHandler:
 
     """Scrapea miembros actuales del grupo"""
     def get_members(self):
-        member_list = [] #{'name':[], 'year':[]}
+        member_names = []
+        member_years = []
 
         try:
-           members = self.relationships.xpath(
+            members = self.relationships.xpath(
                 '//table[@class="details" and (.//th="members:" or .//th="original members:")]')
 
-           if members:
-                member_names = members[0].xpath('.//td//a//bdi//text()')
-                member_years = members[0].xpath('.//text()[following-sibling::br]')
-                member_years = filter(None, map(lambda x: x.strip("[] \n"), member_years))
-                member_list = zip(member_names, member_years)
-        except IndexError:
+            if members:
+                member_names = members[0].xpath('.//a[@title]//bdi//text()')
+                member_info = members[0].xpath(
+                   './/*[not(self::th)]/text()[following::br]')
+                member_info = filter(None, [ x.strip("[] \n") for x in member_info])
+                member_years = ['' for m in member_names]
+
+                len_names = len(member_names)
+                print member_info
+                i = 0
+                for j in range(len(member_info)):
+                    if i < len_names and member_info[j] == member_names[i]:
+                        i+=1
+                    else:
+                        if u'\u2013' in member_info[j]:
+                            time_interval = member_info[j]
+                            regex_result = re.search(r"\((\d*)(.*)(\d*)\)", time_interval)
+                            if regex_result:
+                                time_interval = regex_result.group(0)
+                                member_years[i-1] = time_interval
+        except Exception:
             pass
 
-        return member_list
+
+        return zip(member_names, member_years)
 
 
     """Scrapea lista de álbumes del grupo"""
