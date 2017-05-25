@@ -13,6 +13,7 @@ import requests
 from threading import Thread
 import Queue
 import re
+from dateutil import parser
 
 class spotifyDataHandler:
 
@@ -291,18 +292,18 @@ class musicBrainzHandler:
     """Scrapea los años activos del grupo (comienzo-fin)"""
     def get_active_time(self):
         time = {'begin_year':None, 'end_year':None}
-        
         try:
             if self.search_result:
                 results = self.search_result[0].xpath('//tr[1]//td//text()')
                 begin = results[7].strip("[] \n")
                 end = results[9].strip("[] \n")
                 if begin:
-                    time['begin_year'] = int(begin)
+                    time['begin_year'] = int(parser.parse(begin).year)
                 if end:
-                    time['end_year'] = int(end)
+                    time['end_year'] = int(parser.parse(end).year)
         except Exception:
             pass
+
 
         return time
 
