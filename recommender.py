@@ -79,44 +79,58 @@ def get_recommendations(values):
 
 def mean_similarity_genres_of(artist, recommended_artist):
     genres_similarity = 0
-    genres = data_handler.retrieve_data_for(artist).genre
-    recommend_genres = data_handler.retrieve_data_for(recommended_artist).genre
-
-    for genre in genres:
-        max_similarity = 0
-        for recommend_genre in recommend_genres:
-            similarity = fuzz.ratio(genre.lower(), recommend_genre.lower())
-            if similarity >= max_similarity:
-                max_similarity = similarity
-        
-        genres_similarity += max_similarity
+    groups = Group.query(projection = ['name'])
+    most_similar = data_handler.most_similar_from_to(groups, artist)
+    recommended_most_similar = data_handler.most_similar_from_to(groups, recommended_artist)
     
-    if len(genres) != 0:
-        genres_similarity = genres_similarity / len(genres)
+    if most_similar and recommended_most_similar:
+        genres = data_handler.retrieve_data_for(artist).genre
+        recommend_genres = data_handler.retrieve_data_for(recommended_artist).genre
+
+        for genre in genres:
+            max_similarity = 0
+            for recommend_genre in recommend_genres:
+                similarity = fuzz.ratio(genre.lower(), recommend_genre.lower())
+                if similarity >= max_similarity:
+                    max_similarity = similarity
+        
+            genres_similarity += max_similarity
+    
+        if len(genres) != 0:
+            genres_similarity = genres_similarity / len(genres)
+        else:
+            genres_similarity = 0
     else:
-        genres_similarity = 0
+        genres_similarity = 100
 
     return genres_similarity
 
 
 def mean_similarity_tags_of(artist, recommended_artist):
     tags_similarity = 0
-    tags = data_handler.retrieve_data_for(artist).tags
-    recommend_tags = data_handler.retrieve_data_for(recommended_artist).tags
-
-    for tag in tags:
-        max_similarity = 0
-        for recommend_tag in recommend_tags:
-            similarity = fuzz.ratio(tag.lower(), recommend_tag.lower())
-            if similarity >= max_similarity:
-                max_similarity = similarity
-        
-        tags_similarity += max_similarity
+    groups = Group.query(projection = ['name'])
+    most_similar = data_handler.most_similar_from_to(groups, artist)
+    recommended_most_similar = data_handler.most_similar_from_to(groups, recommended_artist)
     
-    if len(tags) != 0:
-        tags_similarity = tags_similarity / len(tags)
+    if most_similar and recommended_most_similar:
+        tags = data_handler.retrieve_data_for(artist).tags
+        recommend_tags = data_handler.retrieve_data_for(recommended_artist).tags
+
+        for tag in tags:
+            max_similarity = 0
+            for recommend_tag in recommend_tags:
+                similarity = fuzz.ratio(tag.lower(), recommend_tag.lower())
+                if similarity >= max_similarity:
+                    max_similarity = similarity
+        
+            tags_similarity += max_similarity
+    
+        if len(tags) != 0:
+            tags_similarity = tags_similarity / len(tags)
+        else:
+            tags_similarity = 0
     else:
-        tags_similarity = 0
+        tags_similarity = 100
 
     return tags_similarity
 

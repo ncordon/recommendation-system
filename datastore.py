@@ -36,7 +36,7 @@ class DataStore:
         query(ndb.query): query tal que los objetos tienen el atributo name
         target(str): nombre al que queremos asemejarnos
     """
-    def __most_similar_from_to(self, query, target):
+    def most_similar_from_to(self, query, target):
         max_similarity = 0
         result = None
         query = query.iter()
@@ -118,7 +118,7 @@ class DataStore:
     def retrieve_recommendations(self, group_name, n_recommendations, request_queue):
         groups = Recommendation.query(projection = ['name'])
 
-        most_similar = self.__most_similar_from_to(groups, group_name)
+        most_similar = self.most_similar_from_to(groups, group_name)
 
         # Si existe un grupo de nombre lo suficientemente parecido en base de datos
         if most_similar:
@@ -173,7 +173,7 @@ class DataStore:
     """
     def retrieve_data_for(self, group_name):
         groups = Group.query(projection = ['name'])
-        most_similar = self.__most_similar_from_to(groups, group_name)
+        most_similar = self.most_similar_from_to(groups, group_name)
         needs_update = False
 
         if most_similar:
