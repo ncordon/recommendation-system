@@ -179,6 +179,7 @@ class youtubeDataHandler:
 class musicBrainzHandler:
     def __init__(self, group_name):
         self.group_name = group_name
+        self.search_result = None
         # Calcula el nombre concatenando partes separadas por espacio por un +
         formatted_name="+".join(self.group_name.split())
         base_page = 'https://musicbrainz.org'
@@ -186,10 +187,10 @@ class musicBrainzHandler:
         results_page = requests.get(search_url, timeout = None)
         # Extrae url del primer resultado al buscar en musicbrainz el nombre del grupo
         base_tree = html.fromstring(results_page.content)
-        first_result = base_tree.xpath(
-            '//table[@class="tbl"]')[0].xpath('//tbody//tr//td//a')[0].values()[0]
+        self.search_result = base_tree.xpath('//table[@class="tbl"]')[0].xpath('//tbody')
+        group_id = self.search_result[0].xpath('//tr[1]//td//a')[0].values()[0]
         # artist_url almacena la página del priemr resultado
-        self.artist_url = base_page + first_result
+        self.artist_url = base_page + group_id
         self.__fetch_data()
 
 
@@ -236,12 +237,12 @@ class musicBrainzHandler:
             if members:
                 member_names = members[0].xpath('.//a[@title]//bdi//text()')
                 member_info = members[0].xpath(
-                   './/*[not(self::th)]/text()[following::br]')
+                   './/*[not(self::th)]//text()[following::br]')
                 member_info = filter(None, [ x.strip("[] \n") for x in member_info])
                 member_years = ['' for m in member_names]
 
                 len_names = len(member_names)
-                print member_info
+
                 i = 0
                 for j in range(len(member_info)):
                     if i < len_names and member_info[j] == member_names[i]:
@@ -287,7 +288,20 @@ class musicBrainzHandler:
 
         return tags
 
+    """Scrapea los años activos del grupo (comienzo-fin)"""
+    def get_active_time(self):
+        time = {'begin_year':None, 'end_year':None}
 
+        if self.search_result:
+            results = self.search_result[0].xpath('//tr[1]//td//text()')
+            begin = results[7].strip("[] \n")
+            end = results[9].strip("[] \n")
+            if begin:
+                time['begin_year'] = int(begin)
+            if end:
+                time['end_year'] = int(end)
+
+        return time
 
 spotify_handler = spotifyDataHandler()
 youtube_handler = youtubeDataHandler()

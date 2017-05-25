@@ -2,7 +2,10 @@
 {% block title %}Grupos{% endblock %}
 {% block body %}
   <img class="group-img" src="{{artist.img}}" width="200" height="200">
-  <h3 class="group-name">{{ artist.name }}</h3>
+  <h3
+    class="group-name">{{ artist.name }}
+    ({%if artist.begin_year %}{{artist.begin_year}}{% endif %} - {%if artist.end_year %}{{artist.end_year}}{% endif %})
+  </h3>
   <h4>Descripción:</h4>
   <p>{{artist.description}}</p>
   <table class="pure-table group_table">

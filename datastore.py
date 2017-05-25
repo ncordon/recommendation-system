@@ -59,10 +59,11 @@ class DataStore:
     Return:
         group_key: key del grupo creado
     """
-    def create_group(self, name, description, genre, members, score, area, begin_year,
-                     spotify_url, spotify_followers, youtube_channel, tags, img):
-        group = Group(name = name, description = description, genre = genre, members = members,
-                      score = score, begin_year = begin_year, area = area,
+    def create_group(self, name, begin_year, end_year, description, genre, members, score,
+                     area, spotify_url, spotify_followers, youtube_channel, tags, img):
+        group = Group(name = name, begin_year = begin_year, end_year = end_year,
+                      description = description, genre = genre, members = members,
+                      score = score, area = area,
                       spotify_url = spotify_url, spotify_followers = spotify_followers,
                       youtube_channel = youtube_channel, tags = tags,img = img)
         group_key = group.put()
@@ -303,6 +304,9 @@ class DataStore:
         members = [GroupMember(name = m[0], time_interval = m[1]) for m in members]
 
         tags = musicbrainz_handler.get_tags()
+        active_time = musicbrainz_handler.get_active_time()
+        begin_year = active_time['begin_year']
+        end_year = active_time['end_year']
 
         # Unimos la hebra de spotify y recojemos sus resultados
         apis_thread.join()
@@ -310,8 +314,9 @@ class DataStore:
         albums = results['albums']
         youtube_channel = results['youtube_channel']
 
-        artist_key = self.create_group(artist["name"], description, artist["genres"], members,
-                                       int(artist["popularity"]), "UNKNOWN", 0000,
+        artist_key = self.create_group(artist["name"], begin_year, end_year,
+                                       description, artist["genres"], members,
+                                       int(artist["popularity"]), "UNKNOWN",
                                        artist["external_urls"]["spotify"],
                                        int(artist["followers"]["total"]),
                                        youtube_channel, tags,artist["images"][0]['url'])
@@ -340,13 +345,13 @@ class GroupMember(ndb.Model):
 
 class Group(ndb.Model):
     name = ndb.StringProperty( required = True )
-    year = ndb.IntegerProperty()
+    begin_year = ndb.IntegerProperty()
+    end_year = ndb.IntegerProperty()
     description = ndb.TextProperty()
     genre = ndb.StringProperty( repeated = True )
     members = ndb.StructuredProperty( GroupMember, repeated=True )
     score = ndb.IntegerProperty()
     area = ndb.StringProperty()
-    begin_year = ndb.IntegerProperty()
     spotify_url = ndb.StringProperty()
     spotify_followers = ndb.IntegerProperty()
     youtube_channel = ndb.StringProperty()
