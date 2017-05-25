@@ -49,13 +49,14 @@ def get_recommendations(values):
     #############################################################
 
     union_recommendations = list(set(union_recommendations) - set(intersect_recommendations))
+    groups = Group.query(projection = ['name'])
 
     for recommendation in union_recommendations:
         similarity_genres = 0
         similarity_tags = 0
         for value in values:
-            similarity_genres += mean_similarity_genres_of(value, recommendation)
-            similarity_tags += mean_similarity_tags_of(value, recommendation)
+            similarity_genres += mean_similarity_genres_of(value, recommendation, groups)
+            similarity_tags += mean_similarity_tags_of(value, recommendation, groups)
 
         similarity_genres = similarity_genres / len(values)
         similarity_tags = similarity_tags / len(values)
@@ -77,9 +78,8 @@ def get_recommendations(values):
 
     return recommendations
 
-def mean_similarity_genres_of(artist, recommended_artist):
+def mean_similarity_genres_of(artist, recommended_artist, groups):
     genres_similarity = 0
-    groups = Group.query(projection = ['name'])
     most_similar = data_handler.most_similar_from_to(groups, artist)
     recommended_most_similar = data_handler.most_similar_from_to(groups, recommended_artist)
     
@@ -106,9 +106,8 @@ def mean_similarity_genres_of(artist, recommended_artist):
     return genres_similarity
 
 
-def mean_similarity_tags_of(artist, recommended_artist):
+def mean_similarity_tags_of(artist, recommended_artist, groups):
     tags_similarity = 0
-    groups = Group.query(projection = ['name'])
     most_similar = data_handler.most_similar_from_to(groups, artist)
     recommended_most_similar = data_handler.most_similar_from_to(groups, recommended_artist)
     
