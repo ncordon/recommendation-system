@@ -57,8 +57,8 @@ def get_recommendations(values):
             similarity_genres += mean_similarity_genres_of(value, recommendation)
             similarity_tags += mean_similarity_tags_of(value, recommendation)
 
-        similarity_genres = similarity_genres / 3.0
-        similarity_tags = similarity_tags / 3.0
+        similarity_genres = similarity_genres / len(values)
+        similarity_tags = similarity_tags / len(values)
 
         if similarity_tags >= 70 or similarity_genres >= 70:
             recommendations.append(recommendation)
