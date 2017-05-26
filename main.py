@@ -37,7 +37,7 @@ def recommend():
             return render_template("table.html", recommendations = recommendations)
         except Exception:
             return render_template("notFound.html", msg =
-                                   str("Lo sentimos, no disponemos de información para esos grupos"))
+                            to_utf8("Lo sentimos, no disponemos de información para esos grupos"))
     else:
         return render_template("ask-recommendation.html")
 
@@ -52,7 +52,7 @@ def echo_group(group_name):
         return render_template("artist.html", artist = artist, albums = albums)
     except Exception:
         return render_template("notFound.html", msg =
-                               str("Desafortunadamente no encontramos el grupo que buscas"))
+                               to_utf8("Desafortunadamente no encontramos el grupo que buscas"))
 
 
 @app.route("/<group_name>/<album_name>")
@@ -65,7 +65,7 @@ def echo_album(group_name, album_name):
         return render_template("album.html", album = album, songs = songs)
     except Exception:
         return render_template("notFound.html", msg =
-                               str("Lo sentimos, no encontramos el álbum que buscas"))
+                               to_utf8("Lo sentimos, no encontramos el album que buscas"))
 
 
 @app.errorhandler(404)
