@@ -36,7 +36,7 @@ class DataStore:
         query(ndb.query): query tal que los objetos tienen el atributo name
         target(str): nombre al que queremos asemejarnos
     """
-    def __most_similar_from_to(self, query, target):
+    def most_similar_from_to(self, query, target):
         max_similarity = 0
         result = None
         query = query.iter()
@@ -118,7 +118,7 @@ class DataStore:
     def retrieve_recommendations(self, group_name, n_recommendations, request_queue):
         groups = Recommendation.query(projection = ['name'])
 
-        most_similar = self.__most_similar_from_to(groups, group_name)
+        most_similar = self.most_similar_from_to(groups, group_name)
 
         # Si existe un grupo de nombre lo suficientemente parecido en base de datos
         if most_similar:
@@ -173,7 +173,7 @@ class DataStore:
     """
     def retrieve_data_for(self, group_name):
         groups = Group.query(projection = ['name'])
-        most_similar = self.__most_similar_from_to(groups, group_name)
+        most_similar = self.most_similar_from_to(groups, group_name)
         needs_update = False
 
         if most_similar:
@@ -253,16 +253,18 @@ class DataStore:
         group_name = to_utf8(group_name)
         video_id = youtube_handler.search_video(group_name + " " +
                                                     album_name + " " + "full album")
-        album_key = self.create_album(album_name, "UNKNOWN", 0, 0000,
+        
+        if not self.album_already_exists(album['name']):
+            album_key = self.create_album(album_name, "UNKNOWN", 0, 0000,
                                       album["external_urls"]["spotify"],
                                       video_id, artist_key)
-        # Obtiene canciones usando la API de spotify
-        tracks = spotify_handler.album_tracks(album)
+            # Obtiene canciones usando la API de spotify
+            tracks = spotify_handler.album_tracks(album)
 
-        # Mete cada una de esas canciones en BD
-        for track in tracks:
-            track_name = track["name"].encode("utf-8", "ignore")
-            self.create_song(track_name, float(track["duration_ms"]), 0,
+            # Mete cada una de esas canciones en BD
+            for track in tracks:
+                track_name = track["name"].encode("utf-8", "ignore")
+                self.create_song(track_name, float(track["duration_ms"]), 0,
                                  track["external_urls"]["spotify"], album_key,
                                  bool(track["explicit"]))
 
@@ -281,7 +283,15 @@ class DataStore:
         # Buscamos su canal de youtube
         results['youtube_channel'] = youtube_handler.search_channel(group_name)
 
-
+    """
+    Comprueba si el álbum pasado como parámetro existe en la base de datos
+    """
+    
+    def album_already_exists(self,album_name):
+        q = Album.query(Album.name == album_name)
+        print (q.count() > 0) 
+        return (q.count() > 0) 
+    
     """
     Obtiene datos para el grupo pasado como argumento, y los integra
     Usa las APIs de spotify y youtube y scrapeando datos desde musicbrainz

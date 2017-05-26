@@ -292,7 +292,6 @@ class musicBrainzHandler:
     """Scrapea los años activos del grupo (comienzo-fin)"""
     def get_active_time(self):
         time = {'begin_year':None, 'end_year':None}
-
         try:
             if self.search_result:
                 results = self.search_result[0].xpath('//tr[1]//td//text()')
