@@ -191,7 +191,7 @@ class DataStore:
         albums = []
 
         if artist:
-          albums = Album.query(Album.group_key == artist.key)
+          albums = (Album.query(Album.group_key == artist.key)).order(-Album.score)
 
         return albums
 
@@ -204,7 +204,7 @@ class DataStore:
 
     """
     def get_album(self, album_name):
-        album = (Album.query(Album.name == album_name)).get()
+        album = Album.query(Album.name == album_name).get()
 
         if not album:
             raise NameError
