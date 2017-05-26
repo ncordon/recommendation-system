@@ -15,6 +15,20 @@ import Queue
 import re
 from dateutil import parser
 
+
+
+"""
+Método para convertir strings a utf8
+
+Args:
+   string (str): string a convertir a utf8
+"""
+def to_utf8(string):
+    return string.encode("utf-8", "ignore")
+
+
+
+
 class spotifyDataHandler:
 
     def __init__(self):
@@ -75,11 +89,11 @@ class spotifyDataHandler:
     '''
     Método para obtener la información de los caciones de un album.
     '''
-    def album_tracks(self, album):
+    def album_tracks(self, album_id):
         tracks = []
 
         try:
-            results = self.spotify.album_tracks(album['id'])
+            results = self.spotify.album_tracks(album_id)
             tracks.extend(results['items'])
 
             while results['next']:
@@ -87,6 +101,7 @@ class spotifyDataHandler:
                 tracks.extend(results['items'])
         except Exception:
             pass
+
         return tracks
 
     '''
@@ -132,24 +147,24 @@ class spotifyDataHandler:
 
     '''
     Método para eliminar los albumes duplicados
-    
+
     Args:
         albums : lista de albumes
     '''
     def remove_repeated_albums(self,albums):
         result = []
         albums_dic = {}
-        
+
         #Para eliminar los elementos repetidos usamos un diccionario
         for album in albums:
             albums_dic[album['name']] = album
-    
+
         #Se crea una lista con los elementos del diccionario
-        for name,album in albums_dic.items() : 
+        for name,album in albums_dic.items() :
             result.append(album)
-        
+
         return result
-    
+
 class youtubeDataHandler:
 
     def __init__(self):
@@ -296,15 +311,33 @@ class musicBrainzHandler:
 
     """Scrapea lista de álbumes del grupo"""
     def get_albums(self):
-        albums = {}
+        albums = []
 
         try:
             albums_tree = self.overview.xpath('//table[@class="tbl release-group-list"]//tbody')
+
             for category in albums_tree:
-                for a in category.getchildren():
-                    name = a.getchildren()[1].text_content().lower().encode("utf-8", "ignore")
-                    albums[name] = a.getchildren()[0].text_content()
-               
+                album_table = category.getchildren()
+
+                for a in album_table:
+                    name = to_utf8(a.xpath('.//td[2]//bdi//text()')[0])
+                    score = a.xpath('.//span[@class="current-rating"]//text()')
+                    year = a.xpath('.//td[1]//text()')
+
+                    if year:
+                        year = re.search(r"\d*", year[0])
+                        year = int(year.group(0))
+
+                    else:
+                        year = None
+
+                    if score:
+                        score = float(score[0])
+                    else:
+                        score = None
+
+                    albums += [{'name': name, 'year': year, 'score': score}]
+
         except Exception:
             pass
 

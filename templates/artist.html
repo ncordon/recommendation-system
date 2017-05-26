@@ -37,11 +37,19 @@
     </tr>
     <tr class="pure-table-odd">
       <td>Canal de Youtube:</td>
-      <td><a href='{{artist.youtube_channel}}'> {{ artist.youtube_channel }}</a></td>
+      <td>
+        {% if artist.youtube_channel %}
+          <a href='{{artist.youtube_channel}}'> {{ artist.youtube_channel }}</a>
+        {% endif %}
+      </td>
     </tr>
     <tr>
       <td>Canal de Spotify:</td>
-      <td><a href='{{ artist.spotify_url }}'>{{artist.spotify_url}}</a></td>
+      <td>
+        {% if artist.spotify_url %}
+          <a href='{{ artist.spotify_url }}'> {{artist.spotify_url}}</a>
+        {% endif %}
+      </td>
     </tr>
     <tr class="pure-table-odd">
       <td>Discografia:</td>

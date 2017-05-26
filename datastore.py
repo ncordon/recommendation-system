@@ -11,17 +11,6 @@ from datetime import datetime
 group_update_freq = 5
 
 
-"""
-Método para convertir strings a utf8
-
-Args:
-   string (str): string a convertir a utf8
-"""
-def to_utf8(string):
-    return string.encode("utf-8", "ignore")
-
-
-
 class DataStore:
     """
     Método para calcular si un resultado es lo suficientemente similar de
@@ -252,14 +241,14 @@ class DataStore:
         album_name = to_utf8(album['name'])
         group_name = to_utf8(group_name)
         video_id = youtube_handler.search_video(group_name + " " +
-                                                    album_name + " " + "full album")
+                                                album_name + " " + "full album")
 
-       
-        album_key = self.create_album(album_name, 0, album['year'],
-                                      album["external_urls"]["spotify"],
+
+        album_key = self.create_album(album['name'], album['score'], album['year'],
+                                      album['spotify_url'],
                                       video_id, artist_key)
-            # Obtiene canciones usando la API de spotify
-        tracks = spotify_handler.album_tracks(album)
+        # Obtiene canciones usando la API de spotify
+        tracks = spotify_handler.album_tracks(album['spotify_id'])
 
             # Mete cada una de esas canciones en BD
         for track in tracks:
@@ -308,34 +297,41 @@ class DataStore:
         tags = musicbrainz_handler.get_tags()
         active_time = musicbrainz_handler.get_active_time()
         area = musicbrainz_handler.get_area()
-        year_albums = musicbrainz_handler.get_albums()
+        albums = musicbrainz_handler.get_albums()
+
         begin_year = active_time['begin_year']
         end_year = active_time['end_year']
 
         # Unimos la hebra de spotify y recojemos sus resultados
         apis_thread.join()
         artist = results['artist']
-        albums = results['albums']
+        spotify_albums = results['albums']
         youtube_channel = results['youtube_channel']
 
         # Une a los tags los géneros obtenidos desde spotify y no encontrados en ellos, y al área
         tags = set(tags) | set(artist["genres"]) | set([area])
-    
-        #Agregamos a los albums el campo year obtenido en el scrapeo
-        for album in albums:
-            #crea el campo year en cada album
-            album['year'] = 0
-            
-            album_name = album['name'].lower()
-            if album_name in year_albums :
-                album['year'] = int(year_albums[album_name])
-               
 
-        artist_key = self.create_group(artist["name"], begin_year, end_year,
-                                       description, artist["genres"], members,
-                                       int(artist["popularity"]), area,
-                                       artist["external_urls"]["spotify"],
-                                       int(artist["followers"]["total"]),
+
+        # Agregamos a los albums los datos de spotify obtenidos desde la API
+        for album in albums:
+            name = album['name'].lower()
+            # Añade la url de spotify y el id del disco
+            album['spotify_url'] = None
+            album['spotify_id'] = None
+
+            # Intenta hacer match con los datos recuperados desde spotify
+            for spotify_album in spotify_albums:
+                # Si el álbum tiene el mismo título (admitiendo por ejemplo modificaciones como la
+                # coletilla -Remastered-
+                if fuzz.partial_ratio(spotify_album['name'].lower(), name.lower()) == 100:
+                    album['spotify_url'] = spotify_album['external_urls']['spotify']
+                    album['spotify_id']  = spotify_album['id']
+
+        artist_key = self.create_group(artist['name'], begin_year, end_year,
+                                       description, artist['genres'], members,
+                                       int(artist['popularity']), area,
+                                       artist['external_urls']['spotify'],
+                                       int(artist['followers']['total']),
                                        youtube_channel, tags, artist["images"][0]['url'])
 
         # Creamos una hebra por cada album del disco para examinarlos de forma paralela
@@ -384,7 +380,7 @@ class Recommendation(ndb.Model):
 
 class Album(ndb.Model):
     name = ndb.StringProperty( required = True )
-    score = ndb.IntegerProperty()
+    score = ndb.FloatProperty()
     year = ndb.IntegerProperty()
     group_key = ndb.KeyProperty()
     spotify_url = ndb.StringProperty()

@@ -13,7 +13,11 @@
       {% endif %}
       <tr>
         <td>Enlace a Spotify:</td>
-        <td><a href='{{ album.spotify_url}}'>{{album.spotify_url}}</a></td>
+        <td>
+          {% if album.spotify_url %}
+            <a href='{{ album.spotify_url}}'>{{album.spotify_url}}</a>
+          {% endif %}
+        </td>
       </tr>
       <tr class="pure-table-odd odd-fix">
         <td>Canciones:</td>
