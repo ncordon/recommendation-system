@@ -254,19 +254,19 @@ class DataStore:
         video_id = youtube_handler.search_video(group_name + " " +
                                                     album_name + " " + "full album")
 
-        if not self.album_already_exists(album['name']):
-            album_key = self.create_album(album_name, "UNKNOWN", 0, 0000,
+       
+        album_key = self.create_album(album_name, "UNKNOWN", 0, 0000,
                                       album["external_urls"]["spotify"],
                                       video_id, artist_key)
             # Obtiene canciones usando la API de spotify
-            tracks = spotify_handler.album_tracks(album)
+        tracks = spotify_handler.album_tracks(album)
 
             # Mete cada una de esas canciones en BD
-            for track in tracks:
-                track_name = track["name"].encode("utf-8", "ignore")
-                self.create_song(track_name, float(track["duration_ms"]), 0,
-                                 track["external_urls"]["spotify"], album_key,
-                                 bool(track["explicit"]))
+        for track in tracks:
+            track_name = track["name"].encode("utf-8", "ignore")
+            self.create_song(track_name, float(track["duration_ms"]), 0,
+                             track["external_urls"]["spotify"], album_key,
+                             bool(track["explicit"]))
 
     """
     Obtiene datos para el grupo pasado como argumento.
@@ -283,17 +283,6 @@ class DataStore:
         # Buscamos su canal de youtube
         results['youtube_channel'] = youtube_handler.search_channel(group_name)
 
-    """
-    Comprueba si el álbum pasado existe en la base de datos
-
-    Args:
-        group_name (str): nombre del grupo
-    """
-
-    def album_already_exists(self,album_name):
-        q = Album.query(Album.name == album_name)
-        print (q.count() > 0)
-        return (q.count() > 0)
 
     """
     Obtiene datos para el grupo pasado como argumento, y los integra

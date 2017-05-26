@@ -65,6 +65,7 @@ class spotifyDataHandler:
                 results = self.spotify.next(results)
                 albums.extend(results['items'])
 
+            albums = self.remove_repeated_albums(albums)
             albums.sort(key=lambda album:album['name'].lower())
         except Exception:
             pass
@@ -129,7 +130,26 @@ class spotifyDataHandler:
         result = result[:limitlen]
         return result
 
-
+    '''
+    Método para eliminar los albumes duplicados
+    
+    Args:
+        albums : lista de albumes
+    '''
+    def remove_repeated_albums(self,albums):
+        result = []
+        albums_dic = {}
+        
+        #Para eliminar los elementos repetidos usamos un diccionario
+        for album in albums:
+            albums_dic[album['name']] = album
+    
+        #Se crea una lista con los elementos del diccionario
+        for name,album in albums_dic.items() : 
+            result.append(album)
+        
+        return result
+    
 class youtubeDataHandler:
 
     def __init__(self):
