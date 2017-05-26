@@ -230,8 +230,8 @@ class musicBrainzHandler:
         area = ''
         try:
             if self.search_result:
-                results = self.search_result[0].xpath('//tr[1]//td//text()')
-                area = results[6].strip("[] \n")
+                results = self.search_result[0].xpath('//tr[1]//td[6]//text()')
+                area = results[0].strip("[] \n")
         except Exception:
             pass
 
@@ -306,9 +306,10 @@ class musicBrainzHandler:
         time = {'begin_year':None, 'end_year':None}
         try:
             if self.search_result:
-                results = self.search_result[0].xpath('//tr[1]//td//text()')
-                begin = results[7].strip("[] \n")
-                end = results[9].strip("[] \n")
+                begin = self.search_result[0].xpath('//tr[1]//td[7]//text()')
+                end = self.search_result[0].xpath('//tr[1]//td[9]//text()')
+                begin = begin[0].strip("[] \n")
+                end = end[0].strip("[] \n")
                 if begin:
                     time['begin_year'] = int(parser.parse(begin).year)
                 if end:

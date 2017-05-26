@@ -328,8 +328,8 @@ class DataStore:
         albums = results['albums']
         youtube_channel = results['youtube_channel']
 
-        # Une a los tags los géneros obtenidos desde spotify y no encontrados en ellos
-        tags = set(tags) | set(artist["genres"])
+        # Une a los tags los géneros obtenidos desde spotify y no encontrados en ellos, y al área
+        tags = set(tags) | set(artist["genres"]) | set([area])
 
         artist_key = self.create_group(artist["name"], begin_year, end_year,
                                        description, artist["genres"], members,
