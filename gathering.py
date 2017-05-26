@@ -225,6 +225,18 @@ class musicBrainzHandler:
 
         return description.encode("ISO-8859-1", "ignore").decode('utf8')
 
+    """Scrapea el área del grupo"""
+    def get_area(self):
+        area = ''
+        try:
+            if self.search_result:
+                results = self.search_result[0].xpath('//tr[1]//td//text()')
+                area = results[6].strip("[] \n")
+        except Exception:
+            pass
+
+
+        return area
 
     """Scrapea miembros actuales del grupo"""
     def get_members(self):

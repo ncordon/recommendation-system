@@ -253,7 +253,7 @@ class DataStore:
         group_name = to_utf8(group_name)
         video_id = youtube_handler.search_video(group_name + " " +
                                                     album_name + " " + "full album")
-        
+
         if not self.album_already_exists(album['name']):
             album_key = self.create_album(album_name, "UNKNOWN", 0, 0000,
                                       album["external_urls"]["spotify"],
@@ -284,14 +284,17 @@ class DataStore:
         results['youtube_channel'] = youtube_handler.search_channel(group_name)
 
     """
-    Comprueba si el álbum pasado como parámetro existe en la base de datos
+    Comprueba si el álbum pasado existe en la base de datos
+
+    Args:
+        group_name (str): nombre del grupo
     """
-    
+
     def album_already_exists(self,album_name):
         q = Album.query(Album.name == album_name)
-        print (q.count() > 0) 
-        return (q.count() > 0) 
-    
+        print (q.count() > 0)
+        return (q.count() > 0)
+
     """
     Obtiene datos para el grupo pasado como argumento, y los integra
     Usa las APIs de spotify y youtube y scrapeando datos desde musicbrainz
@@ -315,6 +318,7 @@ class DataStore:
 
         tags = musicbrainz_handler.get_tags()
         active_time = musicbrainz_handler.get_active_time()
+        area = musicbrainz_handler.get_area()
         begin_year = active_time['begin_year']
         end_year = active_time['end_year']
 
@@ -324,12 +328,15 @@ class DataStore:
         albums = results['albums']
         youtube_channel = results['youtube_channel']
 
+        # Une a los tags los géneros obtenidos desde spotify y no encontrados en ellos
+        tags = set(tags) | set(artist["genres"])
+
         artist_key = self.create_group(artist["name"], begin_year, end_year,
                                        description, artist["genres"], members,
-                                       int(artist["popularity"]), "UNKNOWN",
+                                       int(artist["popularity"]), area,
                                        artist["external_urls"]["spotify"],
                                        int(artist["followers"]["total"]),
-                                       youtube_channel, tags,artist["images"][0]['url'])
+                                       youtube_channel, tags, artist["images"][0]['url'])
 
         # Creamos una hebra por cada album del disco para examinarlos de forma paralela
         threads = []

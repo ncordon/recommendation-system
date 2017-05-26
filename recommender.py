@@ -15,11 +15,11 @@ def get_recommendations(values):
     recommendations = []
     union_recommendations = []
     intersect_recommendations = []
-    
+
     if len(values) > 0:
         rec_per_group = total_recommendations/len(values)
-        
-    for i in range(len(values)): 
+
+    for i in range(len(values)):
         threads.append( Thread(target = data_handler.retrieve_recommendations,
                               args = [values[i], rec_per_group, request_queue]) )
         threads[i].start()
@@ -28,7 +28,7 @@ def get_recommendations(values):
         thread.join()
 
     #############################################################
-    # Obtenemos las tres listas de recomendaciones de cada grupo 
+    # Obtenemos las tres listas de recomendaciones de cada grupo
     # y realizamos la intersección y union de las mismas.
     #############################################################
 
@@ -36,15 +36,16 @@ def get_recommendations(values):
     while not request_queue.empty():
         local_recommendations = request_queue.get()
         union_recommendations = list(set().union(union_recommendations, local_recommendations))
-        if first == True:        
+        if first == True:
             intersect_recommendations = list(local_recommendations)
         else:
-            intersect_recommendations = list(set().intersection(intersect_recommendations, local_recommendations))
+            intersect_recommendations = list(set().intersection(intersect_recommendations,
+                                                                local_recommendations))
         first == False
 
     #############################################################
     # Para cada grupo que no este en la intersección de las listas
-    # comprobamos su parecido haciendo uso de sus tags, géneros y 
+    # comprobamos su parecido haciendo uso de sus tags, géneros y
     # el año
     #############################################################
 
@@ -63,7 +64,7 @@ def get_recommendations(values):
 
         if similarity_tags >= 70 or similarity_genres >= 70:
             recommendations.append(recommendation)
-     
+
     #############################################################
     # Añadimos a las recomendaciones la intersección.
     #############################################################
@@ -82,7 +83,7 @@ def mean_similarity_genres_of(artist, recommended_artist, groups):
     genres_similarity = 0
     most_similar = data_handler.most_similar_from_to(groups, artist)
     recommended_most_similar = data_handler.most_similar_from_to(groups, recommended_artist)
-    
+
     if most_similar and recommended_most_similar:
         genres = data_handler.retrieve_data_for(artist).genre
         recommend_genres = data_handler.retrieve_data_for(recommended_artist).genre
@@ -93,9 +94,9 @@ def mean_similarity_genres_of(artist, recommended_artist, groups):
                 similarity = fuzz.ratio(genre.lower(), recommend_genre.lower())
                 if similarity >= max_similarity:
                     max_similarity = similarity
-        
+
             genres_similarity += max_similarity
-    
+
         if len(genres) != 0:
             genres_similarity = genres_similarity / len(genres)
         else:
@@ -110,7 +111,7 @@ def mean_similarity_tags_of(artist, recommended_artist, groups):
     tags_similarity = 0
     most_similar = data_handler.most_similar_from_to(groups, artist)
     recommended_most_similar = data_handler.most_similar_from_to(groups, recommended_artist)
-    
+
     if most_similar and recommended_most_similar:
         tags = data_handler.retrieve_data_for(artist).tags
         recommend_tags = data_handler.retrieve_data_for(recommended_artist).tags
@@ -121,9 +122,9 @@ def mean_similarity_tags_of(artist, recommended_artist, groups):
                 similarity = fuzz.ratio(tag.lower(), recommend_tag.lower())
                 if similarity >= max_similarity:
                     max_similarity = similarity
-        
+
             tags_similarity += max_similarity
-    
+
         if len(tags) != 0:
             tags_similarity = tags_similarity / len(tags)
         else:
@@ -132,9 +133,3 @@ def mean_similarity_tags_of(artist, recommended_artist, groups):
         tags_similarity = 100
 
     return tags_similarity
-
-
-
-
-
-
