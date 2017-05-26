@@ -89,8 +89,8 @@ class DataStore:
         album_key: key del álbum creado
 
     """
-    def create_album(self, name, genre, score, year, spotify_url,video_url,group_key):
-        album = Album(name = name, genre = genre, score = score, year = year,
+    def create_album(self, name, score, year, spotify_url,video_url,group_key):
+        album = Album(name = name, score = score, year = year,
                       group_key = group_key, spotify_url = spotify_url,video_url=video_url)
         album_key = album.put()
         return album_key
@@ -255,7 +255,7 @@ class DataStore:
                                                     album_name + " " + "full album")
 
        
-        album_key = self.create_album(album_name, "UNKNOWN", 0, album['year'],
+        album_key = self.create_album(album_name, 0, album['year'],
                                       album["external_urls"]["spotify"],
                                       video_id, artist_key)
             # Obtiene canciones usando la API de spotify
@@ -384,7 +384,6 @@ class Recommendation(ndb.Model):
 
 class Album(ndb.Model):
     name = ndb.StringProperty( required = True )
-    genre = ndb.StringProperty()
     score = ndb.IntegerProperty()
     year = ndb.IntegerProperty()
     group_key = ndb.KeyProperty()
