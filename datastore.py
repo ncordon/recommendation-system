@@ -255,7 +255,7 @@ class DataStore:
                                                     album_name + " " + "full album")
 
        
-        album_key = self.create_album(album_name, "UNKNOWN", 0, 0000,
+        album_key = self.create_album(album_name, "UNKNOWN", 0, album['year'],
                                       album["external_urls"]["spotify"],
                                       video_id, artist_key)
             # Obtiene canciones usando la API de spotify
@@ -308,6 +308,7 @@ class DataStore:
         tags = musicbrainz_handler.get_tags()
         active_time = musicbrainz_handler.get_active_time()
         area = musicbrainz_handler.get_area()
+        year_albums = musicbrainz_handler.get_albums()
         begin_year = active_time['begin_year']
         end_year = active_time['end_year']
 
@@ -319,6 +320,16 @@ class DataStore:
 
         # Une a los tags los géneros obtenidos desde spotify y no encontrados en ellos, y al área
         tags = set(tags) | set(artist["genres"]) | set([area])
+    
+        #Agregamos a los albums el campo year obtenido en el scrapeo
+        for album in albums:
+            #crea el campo year en cada album
+            album['year'] = 0
+            
+            album_name = album['name'].lower()
+            if album_name in year_albums :
+                album['year'] = int(year_albums[album_name])
+               
 
         artist_key = self.create_group(artist["name"], begin_year, end_year,
                                        description, artist["genres"], members,

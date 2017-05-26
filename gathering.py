@@ -296,13 +296,15 @@ class musicBrainzHandler:
 
     """Scrapea lista de álbumes del grupo"""
     def get_albums(self):
-        albums = []
+        albums = {}
 
         try:
             albums_tree = self.overview.xpath('//table[@class="tbl release-group-list"]//tbody')
             for category in albums_tree:
-                albums += [ (a.getchildren()[0].text_content(), a.getchildren()[1].text_content())
-                            for a in category.getchildren() ]
+                for a in category.getchildren():
+                    name = a.getchildren()[1].text_content().lower().encode("utf-8", "ignore")
+                    albums[name] = a.getchildren()[0].text_content()
+               
         except Exception:
             pass
 

@@ -9,10 +9,12 @@
         <td>Género: </td>
         <td>{{album.genre}}</td>
       </tr>
+      {% if album.year %}
       <tr class="pure-table-odd">
         <td>Año: </td>
         <td>{{album.year}}</td>
       </tr>
+      {% endif %}
       <tr>
         <td>Enlace a Spotify:</td>
         <td><a href='{{ album.spotify_url}}'>{{album.spotify_url}}</a></td>
