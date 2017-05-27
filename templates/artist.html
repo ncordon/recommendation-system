@@ -4,6 +4,7 @@
   <img class="group-img" src="{{artist.img}}" width="200" height="200">
   <h3
     class="group-name">{{ artist.name }}
+    <br />
     {%if artist.begin_year or artist.end_year or artist.area%}
       ({%if artist.area %}{{artist.area}} {% endif %}
       {%if artist.begin_year %}{{artist.begin_year}}{% endif %} -

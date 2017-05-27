@@ -11,6 +11,17 @@ from datetime import datetime
 group_update_freq = 5
 
 
+
+"""
+Método para convertir strings a utf8
+
+Args:
+   string (str): string a convertir a utf8
+"""
+def to_utf8(string):
+    return string.encode("utf-8", "ignore")
+
+
 class DataStore:
     """
     Método para calcular si un resultado es lo suficientemente similar de
@@ -201,15 +212,18 @@ class DataStore:
 
     Args:
        album_name (str): nombre del grupo
-
+    Return:
+       album
     """
-    def get_album(self, album_name):
-        album = Album.query(Album.name == album_name).get()
+    def get_album(self, group_name, album_name):
+        group = Group.query(Group.name == group_name).get()
 
-        if not album:
-            raise NameError
+        if group:
+            album = Album.query(Album.group_key == group.key, Album.name == album_name).get()
+            if album:
+                return album
 
-        return album
+        raise Exception("El álbum pedido no existe en base de datos")
 
 
     """
@@ -311,21 +325,26 @@ class DataStore:
         # Une a los tags los géneros obtenidos desde spotify y no encontrados en ellos, y al área
         tags = set(tags) | set(artist["genres"]) | set([area])
 
-
+        print(spotify_albums)
         # Agregamos a los albums los datos de spotify obtenidos desde la API
         for album in albums:
-            name = album['name'].lower()
+            name = to_utf8(album['name'].lower())
             # Añade la url de spotify y el id del disco
             album['spotify_url'] = None
             album['spotify_id'] = None
 
+            max = 0
             # Intenta hacer match con los datos recuperados desde spotify
             for spotify_album in spotify_albums:
+                spotify_name = to_utf8(spotify_album['name'].lower())
                 # Si el álbum tiene el mismo título (admitiendo por ejemplo modificaciones como la
                 # coletilla -Remastered-
-                if fuzz.partial_ratio(spotify_album['name'].lower(), name.lower()) == 100:
-                    album['spotify_url'] = spotify_album['external_urls']['spotify']
-                    album['spotify_id']  = spotify_album['id']
+                if fuzz.partial_ratio(spotify_name, name) >= 90:
+                    similarity = fuzz.ratio(spotify_name, name)
+                    if similarity > max:
+                        max = similarity
+                        album['spotify_url'] = spotify_album['external_urls']['spotify']
+                        album['spotify_id']  = spotify_album['id']
 
         artist_key = self.create_group(artist['name'], begin_year, end_year,
                                        description, artist['genres'], members,

@@ -37,7 +37,7 @@ def recommend():
             return render_template("table.html", recommendations = recommendations)
         except Exception:
             return render_template("notFound.html", msg =
-                            to_utf8("Lo sentimos, no disponemos de información para esos grupos"))
+                            to_utf8("Lo sentimos, no disponemos de datos para esos grupos"))
     else:
         return render_template("ask-recommendation.html")
 
@@ -60,12 +60,12 @@ def echo_album(group_name, album_name):
 
     try:
         album_name = normalize(album_name)
-        album = data_handler.get_album(album_name)
+        album = data_handler.get_album(group_name, album_name)
         songs = data_handler.get_songs(album)
         return render_template("album.html", album = album, songs = songs)
     except Exception:
         return render_template("notFound.html", msg =
-                               to_utf8("Lo sentimos, no encontramos el album que buscas"))
+                               to_utf8("Lo sentimos, no encontramos el disco que buscas"))
 
 
 @app.errorhandler(404)

@@ -17,18 +17,6 @@ from dateutil import parser
 
 
 
-"""
-Método para convertir strings a utf8
-
-Args:
-   string (str): string a convertir a utf8
-"""
-def to_utf8(string):
-    return string.encode("utf-8", "ignore")
-
-
-
-
 class spotifyDataHandler:
 
     def __init__(self):
@@ -315,28 +303,31 @@ class musicBrainzHandler:
 
         try:
             albums_tree = self.overview.xpath('//table[@class="tbl release-group-list"]//tbody')
+            names_so_far = []
 
             for category in albums_tree:
                 album_table = category.getchildren()
 
                 for a in album_table:
-                    name = to_utf8(a.xpath('.//td[2]//bdi//text()')[0])
-                    score = a.xpath('.//span[@class="current-rating"]//text()')
-                    year = a.xpath('.//td[1]//text()')
+                    name = a.xpath('.//td[2]//bdi//text()')[0]
+                    if not (name in names_so_far):
+                        names_so_far += [name]
+                        score = a.xpath('.//span[@class="current-rating"]//text()')
+                        year = a.xpath('.//td[1]//text()')
 
-                    if year:
-                        year = re.search(r"\d*", year[0])
-                        year = int(year.group(0))
+                        if year:
+                            year = re.search(r"\d*", year[0])
+                            year = int(year.group(0))
 
-                    else:
-                        year = None
+                        else:
+                            year = None
 
-                    if score:
-                        score = float(score[0])
-                    else:
-                        score = None
+                        if score:
+                            score = float(score[0])
+                        else:
+                            score = None
 
-                    albums += [{'name': name, 'year': year, 'score': score}]
+                        albums += [{'name': name, 'year': year, 'score': score}]
 
         except Exception:
             pass

@@ -14,9 +14,9 @@ indexes:
   properties:
   - name: group_key
   - name: score
-    direction: desc
 
 - kind: Album
   properties:
   - name: group_key
   - name: score
+    direction: desc
