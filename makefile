@@ -15,3 +15,9 @@ mount:
 
 clean:
 	dev_appserver.py app.yaml --clear_datastore
+
+deploy_indexes:
+	test -f ./index.yaml && gcloud app deploy index.yaml
+
+deploy_cron:
+	test -f ./cron.yaml && gcloud app deploy cron.yaml

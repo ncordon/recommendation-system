@@ -76,9 +76,9 @@ class DataStore:
         album_key: key del grupo creado
 
     """
-    def create_song(self, name, duration, score, spotify_url, album_key, explicit):
-        song = Song(name = name, duration = duration, score = score,
-                    album_key = album_key, spotify_url = spotify_url, explicit = explicit)
+    def create_song(self, name, duration, spotify_url, album_key, explicit):
+        song = Song(name = name, duration = duration, album_key = album_key,
+                    spotify_url = spotify_url, explicit = explicit)
         song_key = song.put()
         return song_key
 
@@ -267,7 +267,7 @@ class DataStore:
             # Mete cada una de esas canciones en BD
         for track in tracks:
             track_name = track["name"].encode("utf-8", "ignore")
-            self.create_song(track_name, float(track["duration_ms"]), 0,
+            self.create_song(track_name, float(track["duration_ms"]),
                              track["external_urls"]["spotify"], album_key,
                              bool(track["explicit"]))
 
@@ -325,7 +325,6 @@ class DataStore:
         # Une a los tags los géneros obtenidos desde spotify y no encontrados en ellos, y al área
         tags = set(tags) | set(artist["genres"]) | set([area])
 
-        print(spotify_albums)
         # Agregamos a los albums los datos de spotify obtenidos desde la API
         for album in albums:
             name = to_utf8(album['name'].lower())
@@ -409,7 +408,6 @@ class Album(ndb.Model):
 class Song(ndb.Model):
     name = ndb.StringProperty()
     duration = ndb.FloatProperty()
-    score = ndb.IntegerProperty()
     album_key = ndb.KeyProperty()
     spotify_url = ndb.StringProperty()
     explicit = ndb.BooleanProperty()

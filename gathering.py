@@ -325,7 +325,7 @@ class musicBrainzHandler:
                         if score:
                             score = float(score[0])
                         else:
-                            score = None
+                            score = 0
 
                         albums += [{'name': name, 'year': year, 'score': score}]
 
