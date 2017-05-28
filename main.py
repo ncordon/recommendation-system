@@ -36,7 +36,7 @@ def recommend():
             recommendations = get_recommendations(values)
             return render_template("table.html", recommendations = recommendations)
         except Exception:
-            return render_template("notFound.html", msg =
+            return render_template("error.html", msg =
                             str("Lo sentimos, no disponemos de datos para esos grupos"))
     else:
         return render_template("ask-recommendation.html")
@@ -50,8 +50,11 @@ def echo_group(group_name):
         artist = data_handler.retrieve_data_for(group_name)
         albums = data_handler.get_albums_by(artist.name)
         return render_template("artist.html", artist = artist, albums = albums)
+    except requests.exceptions.RequestException:
+        return render_template("error.html", msg =
+                               str("Error de conexión, vuelve a intentarlo en un rato"))
     except Exception:
-        return render_template("notFound.html", msg =
+        return render_template("error.html", msg =
                                str("Desafortunadamente no encontramos el grupo que buscas"))
 
 
@@ -64,7 +67,7 @@ def echo_album(group_name, album_name):
         songs = data_handler.get_songs(album)
         return render_template("album.html", album = album, songs = songs)
     except Exception:
-        return render_template("notFound.html", msg =
+        return render_template("error.html", msg =
                                str("Lo sentimos, no encontramos el disco que buscas"))
 
 
