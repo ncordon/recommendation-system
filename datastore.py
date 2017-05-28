@@ -169,9 +169,12 @@ class DataStore:
         group_key (ndb.key): key del grupo
     """
     def __cascade_delete(self, group_key):
-        album_keys = Album.query( Album.group_key == group_key).fetch(keys_only = True)
-        song_keys = Song.query( Song.album_key.IN(album_keys) ).fetch(keys_only = True)
-        ndb.delete_multi(song_keys + album_keys + [group_key])
+        try:
+            album_keys = Album.query( Album.group_key == group_key).fetch(keys_only = True)
+            song_keys = Song.query( Song.album_key.IN(album_keys) ).fetch(keys_only = True)
+            ndb.delete_multi(song_keys + album_keys + [group_key])
+        except Exception:
+            pass
 
 
 
@@ -197,8 +200,11 @@ class DataStore:
             artist = most_similar.key.get()
             needs_update = (datetime.utcnow() - artist.last_update).days >= group_update_freq
         if not most_similar or needs_update:
-            group_key = self.get_data_for(group_name)
-            artist = group_key.get()
+            try:
+                group_key = self.get_data_for(group_name)
+                artist = group_key.get()
+            except Exception:
+                deferred.defer(self.__cascade_delete, most_similar.key)
             if needs_update:
                 deferred.defer(self.__cascade_delete, most_similar.key)
 
@@ -316,71 +322,76 @@ class DataStore:
         artist_key (ndb.Key): key del artista en BD
     """
     def get_data_for(self, group_name):
-        results = {}
-        # Creamos una hebra para que Spotify trabaje en segundo plano mientras scrapeamos
-        apis_thread = Thread(target = self.__retrieve_from_apis_for, args = [group_name, results])
-        apis_thread.start()
+        try:
+            results = {}
+            # Creamos una hebra para que Spotify trabaje en segundo plano mientras scrapeamos
+            apis_thread = Thread(target = self.__retrieve_from_apis_for,
+                                 args = [group_name, results])
+            apis_thread.start()
 
-        musicbrainz_handler = musicBrainzHandler(group_name)
-        description = musicbrainz_handler.get_description()
-        members = musicbrainz_handler.get_members()
-        members = [GroupMember(name = m[0], begin_year = m[1], end_year = m[2]) for m in members]
+            musicbrainz_handler = musicBrainzHandler(group_name)
+            description = musicbrainz_handler.get_description()
+            members = musicbrainz_handler.get_members()
+            members = [GroupMember(name = m[0], begin_year = m[1], end_year = m[2]) for
+                       m in members]
 
-        tags = musicbrainz_handler.get_tags()
-        active_time = musicbrainz_handler.get_active_time()
-        area = musicbrainz_handler.get_area()
-        albums = musicbrainz_handler.get_albums()
+            tags = musicbrainz_handler.get_tags()
+            active_time = musicbrainz_handler.get_active_time()
+            area = musicbrainz_handler.get_area()
+            albums = musicbrainz_handler.get_albums()
 
-        begin_year = active_time['begin_year']
-        end_year = active_time['end_year']
+            begin_year = active_time['begin_year']
+            end_year = active_time['end_year']
 
-        # Unimos la hebra de spotify y recojemos sus resultados
-        apis_thread.join()
-        artist = results['artist']
-        spotify_albums = results['albums']
-        youtube_channel = results['youtube_channel']
+            # Unimos la hebra de spotify y recojemos sus resultados
+            apis_thread.join()
+            artist = results['artist']
+            spotify_albums = results['albums']
+            youtube_channel = results['youtube_channel']
 
-        # Une a los tags el área del grupo
-        tags = set(tags) | set([area])
+            # Une a los tags el área del grupo
+            tags = set(tags) | set([area])
 
-        # Agregamos a los albums los datos de spotify obtenidos desde la API
-        for album in albums:
-            name = to_utf8(album['name'].lower())
-            # Añade la url de spotify y el id del disco
-            album['spotify_url'] = None
-            album['spotify_id'] = None
+            # Agregamos a los albums los datos de spotify obtenidos desde la API
+            for album in albums:
+                name = to_utf8(album['name'].lower())
+                # Añade la url de spotify y el id del disco
+                album['spotify_url'] = None
+                album['spotify_id'] = None
 
-            max = 0
-            # Intenta hacer match con los datos recuperados desde spotify
-            for spotify_album in spotify_albums:
-                spotify_name = to_utf8(spotify_album['name'].lower())
-                # Si el álbum tiene el mismo título (admitiendo por ejemplo modificaciones como la
-                # coletilla -Remastered-
-                if fuzz.partial_ratio(spotify_name, name) >= 90:
-                    similarity = fuzz.ratio(spotify_name, name)
-                    if similarity > max:
-                        max = similarity
-                        album['spotify_url'] = spotify_album['external_urls']['spotify']
-                        album['spotify_id']  = spotify_album['id']
+                max = 0
+                # Intenta hacer match con los datos recuperados desde spotify
+                for spotify_album in spotify_albums:
+                    spotify_name = to_utf8(spotify_album['name'].lower())
+                    # Si el álbum tiene el mismo título (admitiendo por ejemplo coletillas como
+                    # -Remastered-
+                    if fuzz.partial_ratio(spotify_name, name) >= 90:
+                        similarity = fuzz.ratio(spotify_name, name)
+                        if similarity > max:
+                            max = similarity
+                            album['spotify_url'] = spotify_album['external_urls']['spotify']
+                            album['spotify_id']  = spotify_album['id']
 
-        artist_key = self.create_group(artist['name'], begin_year, end_year,
-                                       description, artist['genres'], members,
-                                       area, artist['external_urls']['spotify'],
-                                       youtube_channel, tags, artist["images"][0]['url'])
+            artist_key = self.create_group(artist['name'], begin_year, end_year,
+                                           description, artist['genres'], members,
+                                           area, artist['external_urls']['spotify'],
+                                           youtube_channel, tags, artist["images"][0]['url'])
 
-        # Creamos una hebra por cada album del disco para examinarlos de forma paralela
-        threads = []
+            # Creamos una hebra por cada album del disco para examinarlos de forma paralela
+            threads = []
 
-        for i in range(len(albums)):
-            threads.append(Thread(target = self.__retrieve_songs_for,
-                                  args = [albums[i], group_name, artist_key, ]))
-            threads[i].start()
+            for i in range(len(albums)):
+                threads.append(Thread(target = self.__retrieve_songs_for,
+                                      args = [albums[i], group_name, artist_key, ]))
+                threads[i].start()
 
-        # Esperamos a que terminen todas las hebras
-        for thread in threads:
-            thread.join()
+            # Esperamos a que terminen todas las hebras
+            for thread in threads:
+                thread.join()
 
-        return artist_key
+            return artist_key
+        except Exception:
+            raise Exception("Error de scrapeo")
 
 
 """

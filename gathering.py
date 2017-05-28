@@ -260,23 +260,24 @@ class musicBrainzHandler:
         self.artist_url = base_page + group_id
         self.__fetch_data()
 
+    def __fetch_page(self, url):
+        try:
+            page = requests.get(url, timeout = None)
+            return html.fromstring(page.content)
+        except Exception:
+            return None
 
     def __fetch_description(self):
-        wiki_page = requests.get(self.artist_url + '/wikipedia-extract', timeout = None)
-        self.wiki_extract = html.fromstring(wiki_page.content)
+        self.wiki_extract = self.__fetch_page(self.artist_url + '/wikipedia-extract')
 
 
     def __fetch_data(self):
         wiki_thread = Thread(target = self.__fetch_description)
         wiki_thread.start()
-
-        overview_page = requests.get(self.artist_url, timeout = None)
-        self.overview = html.fromstring(overview_page.content)
-        rel_page = requests.get(self.artist_url + '/relationships', timeout = None)
-        self.relationships = html.fromstring(rel_page.content)
         # Obtiene el árbol html de la pestaña Overview, Relationships y Tags
-        tags_page = requests.get(self.artist_url + '/tags', timeout = None)
-        self.tags = html.fromstring(tags_page.content)
+        self.overview = self.__fetch_page(self.artist_url)
+        self.relationships = self.__fetch_page(self.artist_url + '/relationships')
+        self.tags = self.__fetch_page(self.artist_url + '/tags')
         wiki_thread.join()
 
     """
@@ -425,8 +426,9 @@ class musicBrainzHandler:
         tags = []
 
         try:
-            tags = [ t[0][0].text_content() for t in
+            pre_tags = [ t[0][0].text_content() for t in
                      self.tags.xpath('//div[@id="all-tags"]')[0][0].getchildren() ]
+            tags = [ tag for tag in pre_tags if tag.strip(" ") != u'' ]
         except Exception:
             pass
 
