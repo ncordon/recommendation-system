@@ -19,14 +19,37 @@
           {% endif %}
         </td>
       </tr>
+     
       <tr class="pure-table-odd odd-fix">
         <td>Canciones:</td>
         <td>
+          <table class="pure-table-odd">
+            <tr class="pure-table-odd">
+              <th>Nombre</th>
+              <th>Duración</th>
+              <th>Explícita</th>
+            </tr>
           <ul>
             {% for song in songs %}
-            <li><a href='{{song.spotify_url}}'>{{song.name}}</a></li>
+             <tr class="pure-table-odd">
+                <td>
+                    <li><a href='{{song.spotify_url}}'>{{song.name}}</a></li>
+                </td>
+                <td> {{(song.duration % 3600)//60}}:{{(song.duration % 3600) % 60}}
+                </td>
+                <td>
+                    {% if song.explicit %}
+                        Sí
+                    {% else %}
+                        No
+                    {% endif %}
+                </td>
+              </tr>
+              
             {% endfor %}
+              
           </ul>
+        </table>
         </td>
       </tr>
     </table>

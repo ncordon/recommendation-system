@@ -267,7 +267,8 @@ class DataStore:
             # Mete cada una de esas canciones en BD
         for track in tracks:
             track_name = track["name"].encode("utf-8", "ignore")
-            self.create_song(track_name, float(track["duration_ms"]),
+            duration = int((track["duration_ms"]/1000))
+            self.create_song(track_name, duration,
                              track["external_urls"]["spotify"], album_key,
                              bool(track["explicit"]))
 
@@ -407,7 +408,7 @@ class Album(ndb.Model):
 
 class Song(ndb.Model):
     name = ndb.StringProperty()
-    duration = ndb.FloatProperty()
+    duration = ndb.IntegerProperty()
     album_key = ndb.KeyProperty()
     spotify_url = ndb.StringProperty()
     explicit = ndb.BooleanProperty()
