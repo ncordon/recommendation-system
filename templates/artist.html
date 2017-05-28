@@ -20,7 +20,12 @@
       <td>
         <ul>
         {% for member in artist.members %}
-          <li>{{ member.name }} {{member.time_interval}}</li>
+          <li>{{ member.name }}
+		    {% if member.begin_year or member.end_year%}
+			  ({% if member.begin_year %} {{member.begin_year}} {% endif %} -
+			  {% if member.end_year %} {{member.end_year}} {% endif %})
+			{% endif %}
+		  </li>
         {% endfor %}
         </ul>
       </td>

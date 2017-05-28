@@ -17,6 +17,9 @@ from dateutil import parser
 from params import *
 
 
+"""
+Manejador de peticiones de datos a la API de Spotify
+"""
 class spotifyDataHandler:
 
     def __init__(self):
@@ -24,9 +27,12 @@ class spotifyDataHandler:
         self.spotify = spotipy.Spotify(client_credentials_manager = self.client_credentials_manager)
         self.spotify.trace = False
 
-    '''
+    """
     Método para obtener la información de un artista por el nombre.
-    '''
+
+    Args:
+        name (str): nombre del artista a buscar en spotify
+    """
     def get_artist_by_name(self, name):
         results = self.spotify.search(q = name, limit = 1, type = "artist")
         artist = {}
@@ -38,9 +44,12 @@ class spotifyDataHandler:
 
         return artist
 
-    '''
+    """
     Método para obtener la información de un album por el nombre.
-    '''
+
+    Args:
+        name (str): nombre del álbum
+    """
     def get_album_by_name(self, name):
         results = self.spotify.search(q = name, limit = 1, type = "album")
         album = {}
@@ -52,9 +61,13 @@ class spotifyDataHandler:
 
         return album
 
-    '''
+
+    """
     Método para obtener la información de los albumes de un artista por el nombre.
-    '''
+
+    Args:
+        artist (str): nombre del grupo/artista
+    """
     def get_albums_by_artist(self, artist):
         albums = []
 
@@ -67,16 +80,19 @@ class spotifyDataHandler:
                 results = self.spotify.next(results)
                 albums.extend(results['items'])
 
-            albums = self.remove_repeated_albums(albums)
+            albums = self.__remove_repeated_albums(albums)
             albums.sort(key=lambda album:album['name'].lower())
         except Exception:
             pass
 
         return albums
 
-    '''
-    Método para obtener la información de los caciones de un album.
-    '''
+    """
+    Método para obtener la información de las caciones de un album.
+
+    Args:
+        album_id (int): id del álbum en spotify
+    """
     def album_tracks(self, album_id):
         tracks = []
 
@@ -92,9 +108,12 @@ class spotifyDataHandler:
 
         return tracks
 
-    '''
+    """
     Método para obtener recomendaciones a partir de un artista por el nombre.
-    '''
+
+    Args:
+        name (str): nombre del grupo/artisa
+    """
     def recommendation_by_artist(self, name):
         results = []
 
@@ -107,9 +126,13 @@ class spotifyDataHandler:
         return results
 
 
-    '''
+    """
     Método para obtener recomendaciones en forma de árbol a partir del nombre de un artista.
-    '''
+
+    Args:
+        name (str): Nombre del artista para el que obtener recomnedaciones
+        limitlen (int): Máximo número de recomendaciones a obtener
+    """
     def spider_of_recommendations(self, name, limitlen):
         result = []
         recommend_queue = Queue.Queue()
@@ -133,13 +156,13 @@ class spotifyDataHandler:
         result = result[:limitlen]
         return result
 
-    '''
-    Método para eliminar los albumes duplicados
+    """
+    Método para eliminar los albumes duplicados de una lista
 
     Args:
-        albums : lista de albumes
-    '''
-    def remove_repeated_albums(self,albums):
+        albums: lista de albumes
+    """
+    def __remove_repeated_albums(self,albums):
         result = []
         albums_dic = {}
 
@@ -153,6 +176,9 @@ class spotifyDataHandler:
 
         return result
 
+"""
+Manejador de peticiones de datos a la API de Youtube
+"""
 class youtubeDataHandler:
 
     def __init__(self):
@@ -163,9 +189,16 @@ class youtubeDataHandler:
                              developerKey = DEVELOPER_KEY)
 
 
-    '''Metodo para obtener el id de los videos'''
-    def search_channel(self, query):
-        search_response = self.youtube.search().list(q = query, part = "id", type = "channel",
+    """
+    Metodo para obtener la url del canal de un artista
+
+    Args:
+        group_name (str): nombre del grupo
+    Return:
+        channel_url (str): url para el canal encontrado
+    """
+    def search_channel(self, group_name):
+        search_response = self.youtube.search().list(q = group_name, part = "id", type = "channel",
                                                      maxResults = 1).execute()
 
         channel_url = "Not Found"
@@ -178,7 +211,14 @@ class youtubeDataHandler:
 
         return channel_url
 
-    '''Metodo para obtener el id de los videos'''
+    """
+    Metodo para obtener la url de un vídeo por nombre
+
+    Args:
+         query (str): nombre del vídeo a buscar
+    Return:
+         video_url (str): url para el vídeo encontrado
+    """
     def search_video(self, query):
         search_response = self.youtube.search().list(q = query, part = "id,snippet").execute()
         video_url = "Not Found"
@@ -198,8 +238,11 @@ class youtubeDataHandler:
 
 
 
+"""
+Manejador de peticiones de scrapeo a MusicBrainz
 
-
+Inicialización: m = musicBrainzHandler(<nombre del grupo>)
+"""
 class musicBrainzHandler:
     def __init__(self, group_name):
         self.group_name = group_name
@@ -236,7 +279,12 @@ class musicBrainzHandler:
         self.tags = html.fromstring(tags_page.content)
         wiki_thread.join()
 
-    """Scrapea la descripción del grupo"""
+    """
+    Scrapea la descripción del grupo de Wikipedia
+
+    Return:
+        description (str)
+    """
     def get_description(self):
         description = ""
         try:
@@ -248,7 +296,12 @@ class musicBrainzHandler:
 
         return description.encode("ISO-8859-1", "ignore").decode('utf8')
 
-    """Scrapea el área del grupo"""
+    """
+    Scrapea el área del grupo
+
+    Return:
+        area (str)
+    """
     def get_area(self):
         area = ''
         try:
@@ -261,10 +314,16 @@ class musicBrainzHandler:
 
         return area
 
-    """Scrapea miembros actuales del grupo"""
+    """
+    Scrapea miembros del grupo y sus años en el grupo
+
+    Return:
+        [(member(str), years (str))]
+    """
     def get_members(self):
         member_names = []
-        member_years = []
+        begin_years = []
+        end_years = []
 
         try:
             members = self.relationships.xpath(
@@ -273,13 +332,16 @@ class musicBrainzHandler:
             if members:
                 member_names = members[0].xpath('.//a[@title]//bdi//text()')
                 member_info = members[0].xpath(
-                   './/*[not(self::th)]//text()[following::br]')
+                    './/*[not(self::th)]//text()[following::br]')
                 member_info = filter(None, [ x.strip("[] \n") for x in member_info])
-                member_years = ['' for m in member_names]
+                begin_years = [None for m in member_names]
+                end_years = [None for m in member_names]
 
                 len_names = len(member_names)
 
                 i = 0
+                # Recorremos member_info, puesto que si la fecha se encuentra scrapeada,
+                # debe estar a continuación del nombre del artista
                 for j in range(len(member_info)):
                     if i < len_names and member_info[j] == member_names[i]:
                         i+=1
@@ -287,17 +349,35 @@ class musicBrainzHandler:
                         if u'\u2013' in member_info[j]:
                             time_interval = member_info[j]
                             regex_result = re.search(r"\((\d*)(.*)(\d*)\)", time_interval)
+
                             if regex_result:
-                                time_interval = regex_result.group(0)
-                                member_years[i-1] = time_interval
+                                interval = regex_result.group(0)
+                                begin = re.search(r"\((\d{4})", interval)
+                                end = re.search(r" (\d{4})", interval)
+
+                                # Si puede hacer parse del año de comienzo y de fin
+                                try:
+                                    begin_years[i-1] = int(begin.group(0).strip("("))
+                                except Exception:
+                                    pass
+                                try:
+                                    end_years[i-1] = int(end.group(0).replace(" ", ""))
+                                except Exception:
+                                    pass
         except Exception:
             pass
 
+        return zip(member_names, begin_years, end_years)
 
-        return zip(member_names, member_years)
 
+    """
+    Scrapea lista de álbumes del grupo
 
-    """Scrapea lista de álbumes del grupo"""
+    Return:
+        [{name (str): nombre del grupo,
+          year (int): año del álbum,
+          score (float): score en MusicBrainz del disco}]
+    """
     def get_albums(self):
         albums = []
 
@@ -335,7 +415,12 @@ class musicBrainzHandler:
         return albums
 
 
-    """Scrapea tags para el grupo"""
+    """
+    Scrapea tags para el grupo
+
+    Return:
+        tags ([str]): lista de tags obtenida desde MusicBrainz
+    """
     def get_tags(self):
         tags = []
 
@@ -347,7 +432,13 @@ class musicBrainzHandler:
 
         return tags
 
-    """Scrapea los años activos del grupo (comienzo-fin)"""
+    """
+    Scrapea los años activos del grupo (comienzo-fin)
+
+    Return:
+        time: {begin_year(int): año de comienzo del grupo
+               end_year(int): año de fin del grupo}
+    """
     def get_active_time(self):
         time = {'begin_year':None, 'end_year':None}
         try:
@@ -368,43 +459,3 @@ class musicBrainzHandler:
 
 spotify_handler = spotifyDataHandler()
 youtube_handler = youtubeDataHandler()
-
-'''
-Ejemplos
-'''
-
-if __name__ == '__main__':
-    data = spotifyDataHandler()
-    artist = data.get_artist_by_name("gorillaz",1)
-
-    #albums = data.get_albums_by_artist('gorillaz', 2)
-
-    #data.categories()
-
-    '''for album in albums:
-        print "--------------------ALBUM--------------------"
-        print album['name']
-        tracks = data.albumTracks(album)
-        print "--------------------TRACKS--------------------"
-        for track in tracks:
-            print track['name']
-            '''
-    #print()
-    '''
-    results = data.recommendationByArtist("gorillaz", 1)
-    for track in results['tracks']:
-        print track['artists'][0]['name']
-    print "--------------------2--------------------"
-    results = data.recommendationByArtist("Daft Punk", 1)
-    for track in results['tracks']:
-        print track['artists'][0]['name']
-        '''
-    #lista = []
-    #data.spiderOfRecommendations("gorillaz", lista, 1, 2, 3)
-    #print lista
-
-    '''
-    yt= youtubeData()
-    result = yt.youtube_search("drake",5)
-    print result
-    '''

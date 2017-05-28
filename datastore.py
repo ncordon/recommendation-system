@@ -324,7 +324,7 @@ class DataStore:
         musicbrainz_handler = musicBrainzHandler(group_name)
         description = musicbrainz_handler.get_description()
         members = musicbrainz_handler.get_members()
-        members = [GroupMember(name = m[0], time_interval = m[1]) for m in members]
+        members = [GroupMember(name = m[0], begin_year = m[1], end_year = m[2]) for m in members]
 
         tags = musicbrainz_handler.get_tags()
         active_time = musicbrainz_handler.get_active_time()
@@ -388,7 +388,8 @@ Modelos de la base de datos
 """
 class GroupMember(ndb.Model):
     name = ndb.StringProperty( required = True)
-    time_interval = ndb.StringProperty()
+    begin_year = ndb.IntegerProperty()
+    end_year = ndb.IntegerProperty()
 
 class Group(ndb.Model):
     name = ndb.StringProperty( required = True )
