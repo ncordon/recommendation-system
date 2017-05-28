@@ -8,8 +8,6 @@ from gathering import *
 from fuzzywuzzy import fuzz
 from datetime import datetime
 
-group_update_freq = 5
-
 
 
 """

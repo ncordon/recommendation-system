@@ -14,7 +14,7 @@ from threading import Thread
 import Queue
 import re
 from dateutil import parser
-
+from params import *
 
 
 class spotifyDataHandler:

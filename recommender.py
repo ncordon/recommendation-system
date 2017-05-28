@@ -6,8 +6,6 @@ Librería para cálculo de recomendaciones
 '''
 from datastore import *
 
-total_recommendations = 30
-
 
 """
 Devuelve recomendaciones para unos grupos pasados como parámetros

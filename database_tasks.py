@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from datastore import *
-recom_update_freq = 3
 
 
 def admin_update_proc():
@@ -15,11 +14,6 @@ def admin_update_proc():
             r.similar_groups = set(r.similar_groups + current_similar)
 
         data_handler.retrieve_data_for(r.name)
-    
+
         for name in r.similar_groups:
             data_handler.retrieve_data_for(name)
-
-        
-        
-
-  
