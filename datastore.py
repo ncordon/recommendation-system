@@ -26,17 +26,15 @@ class DataStore:
     """
     Método para calcular si un resultado es lo suficientemente similar de
     entre los de una query, respecto a un target
-
        Comprueba si el valor de 'name' para algún elemento de query es
        lo suficientemente similar a target, y devuelve el más similar
-
        Caso de que no haya uno suficientement similar, devuelve None
 
     Args:
         query(ndb.query): query tal que los objetos tienen el atributo name
         target(str): nombre al que queremos asemejarnos
     """
-    def most_similar_from_to(self, query, target):
+    def __most_similar_from_to(self, query, target):
         max_similarity = 0
         result = None
         query = query.iter()
@@ -54,17 +52,41 @@ class DataStore:
 
 
     """
+    Método wrapper para calcular el grupo más similar a
+    un grupo desde base de datos
+
+    Args:
+        target(str): nombre al que queremos asemejarnos
+    """
+    def most_similar_group_to(self, target):
+        groups = Group.query(projection = ['name'])
+
+        return self.__most_similar_from_to(groups, target)
+
+    """
+    Método wrapper para calcular la recomendación más similar
+    para el nombre de grupo pasado como argumento
+
+    Args:
+        target(str): nombre al que queremos asemejarnos
+    """
+    def most_similar_recommendation_to(self, target):
+        groups = Recommendation.query(projection = ['name'])
+
+        return self.__most_similar_from_to(groups, target)
+
+
+    """
     Crea un grupo en base de datos con los parámetros pasados
 
     Return:
         group_key: key del grupo creado
     """
-    def create_group(self, name, begin_year, end_year, description, genre, members, score,
+    def create_group(self, name, begin_year, end_year, description, genres, members,
                      area, spotify_url, spotify_followers, youtube_channel, tags, img):
         group = Group(name = name, begin_year = begin_year, end_year = end_year,
-                      description = description, genre = genre, members = members,
-                      score = score, area = area,
-                      spotify_url = spotify_url, spotify_followers = spotify_followers,
+                      description = description, genres = genres, members = members,
+                      area = area, spotify_url = spotify_url, spotify_followers = spotify_followers,
                       youtube_channel = youtube_channel, tags = tags,img = img)
         group_key = group.put()
         return group_key
@@ -116,9 +138,7 @@ class DataStore:
        request_queue (Queue): cola de peticiones paralelizadas donde escribir el resultado
     """
     def retrieve_recommendations(self, group_name, n_recommendations, request_queue):
-        groups = Recommendation.query(projection = ['name'])
-
-        most_similar = self.most_similar_from_to(groups, group_name)
+        most_similar = self.most_similar_recommendation_to(group_name)
 
         # Si existe un grupo de nombre lo suficientemente parecido en base de datos
         if most_similar:
@@ -172,8 +192,7 @@ class DataStore:
 
     """
     def retrieve_data_for(self, group_name):
-        groups = Group.query(projection = ['name'])
-        most_similar = self.most_similar_from_to(groups, group_name)
+        most_similar = self.most_similar_group_to(group_name)
         needs_update = False
 
         if most_similar:
@@ -323,8 +342,8 @@ class DataStore:
         spotify_albums = results['albums']
         youtube_channel = results['youtube_channel']
 
-        # Une a los tags los géneros obtenidos desde spotify y no encontrados en ellos, y al área
-        tags = set(tags) | set(artist["genres"]) | set([area])
+        # Une a los tags el área del grupo
+        tags = set(tags) | set([area])
 
         # Agregamos a los albums los datos de spotify obtenidos desde la API
         for album in albums:
@@ -348,8 +367,7 @@ class DataStore:
 
         artist_key = self.create_group(artist['name'], begin_year, end_year,
                                        description, artist['genres'], members,
-                                       int(artist['popularity']), area,
-                                       artist['external_urls']['spotify'],
+                                       area, artist['external_urls']['spotify'],
                                        int(artist['followers']['total']),
                                        youtube_channel, tags, artist["images"][0]['url'])
 
@@ -380,9 +398,8 @@ class Group(ndb.Model):
     begin_year = ndb.IntegerProperty()
     end_year = ndb.IntegerProperty()
     description = ndb.TextProperty()
-    genre = ndb.StringProperty( repeated = True )
+    genres = ndb.StringProperty( repeated = True )
     members = ndb.StructuredProperty( GroupMember, repeated=True )
-    score = ndb.IntegerProperty()
     area = ndb.StringProperty()
     spotify_url = ndb.StringProperty()
     spotify_followers = ndb.IntegerProperty()
