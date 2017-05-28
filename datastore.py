@@ -81,10 +81,10 @@ class DataStore:
         group_key: key del grupo creado
     """
     def create_group(self, name, begin_year, end_year, description, genres, members,
-                     area, spotify_url, spotify_followers, youtube_channel, tags, img):
+                     area, spotify_url, youtube_channel, tags, img):
         group = Group(name = name, begin_year = begin_year, end_year = end_year,
                       description = description, genres = genres, members = members,
-                      area = area, spotify_url = spotify_url, spotify_followers = spotify_followers,
+                      area = area, spotify_url = spotify_url,
                       youtube_channel = youtube_channel, tags = tags,img = img)
         group_key = group.put()
         return group_key
@@ -366,7 +366,6 @@ class DataStore:
         artist_key = self.create_group(artist['name'], begin_year, end_year,
                                        description, artist['genres'], members,
                                        area, artist['external_urls']['spotify'],
-                                       int(artist['followers']['total']),
                                        youtube_channel, tags, artist["images"][0]['url'])
 
         # Creamos una hebra por cada album del disco para examinarlos de forma paralela
@@ -400,7 +399,6 @@ class Group(ndb.Model):
     members = ndb.StructuredProperty( GroupMember, repeated=True )
     area = ndb.StringProperty()
     spotify_url = ndb.StringProperty()
-    spotify_followers = ndb.IntegerProperty()
     youtube_channel = ndb.StringProperty()
     tags = ndb.StringProperty( repeated = True )
     img = ndb.StringProperty()
