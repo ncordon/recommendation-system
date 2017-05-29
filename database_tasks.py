@@ -3,7 +3,10 @@
 
 from datastore import *
 
-
+"""
+Permite actualizar las recomendaciones y grupos de la base de datos que llevan un periodo
+sin actualizarse
+"""
 def admin_update_proc():
     recommendations = Recommendation.query()
     current_date = datetime.utcnow()

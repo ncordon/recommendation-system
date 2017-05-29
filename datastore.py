@@ -9,6 +9,21 @@ from fuzzywuzzy import fuzz
 from datetime import datetime
 
 
+"""
+Borra toda la información en BD para un grupo
+
+Args:
+    group_key (ndb.key): key del grupo
+"""
+def cascade_delete(group_key):
+    try:
+        album_keys = Album.query( Album.group_key == group_key).fetch(keys_only = True)
+        song_keys = Song.query( Song.album_key.IN(album_keys) ).fetch(keys_only = True)
+        ndb.delete_multi(song_keys + album_keys + [group_key])
+    except Exception:
+        pass
+
+
 
 """
 Método para convertir strings a utf8
@@ -163,22 +178,6 @@ class DataStore:
 
 
     """
-    Borra toda la información en BD para un grupo
-
-    Args:
-        group_key (ndb.key): key del grupo
-    """
-    def __cascade_delete(self, group_key):
-        try:
-            album_keys = Album.query( Album.group_key == group_key).fetch(keys_only = True)
-            song_keys = Song.query( Song.album_key.IN(album_keys) ).fetch(keys_only = True)
-            ndb.delete_multi(song_keys + album_keys + [group_key])
-        except Exception:
-            pass
-
-
-
-    """
     Devuelve un grupo en caso de que se pueda recuperar información sobre él
        Si existe un grupo similar en base de datos y no necesita actualización,
           Lo devuelve
@@ -204,9 +203,9 @@ class DataStore:
                 group_key = self.get_data_for(group_name)
                 artist = group_key.get()
             except Exception:
-                deferred.defer(self.__cascade_delete, most_similar.key)
+                deferred.defer(cascade_delete, most_similar.key)
             if needs_update:
-                deferred.defer(self.__cascade_delete, most_similar.key)
+                deferred.defer(cascade_delete, most_similar.key)
 
         return artist
 
@@ -221,7 +220,7 @@ class DataStore:
         albums
     """
     def get_albums_by(self, group_name):
-        artist = (Group.query(Group.name == group_name)).get()
+        artist = ((Group.query(Group.name == group_name)).order(-Group.last_update)).get()
         albums = []
 
         if artist:
