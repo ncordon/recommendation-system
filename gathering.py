@@ -331,7 +331,8 @@ class musicBrainzHandler:
                 '//table[@class="details" and (.//th="members:" or .//th="original members:")]')
 
             if members:
-                member_names = members[0].xpath('.//a[@title]//bdi//text()')
+                member_names = members[0].xpath(
+                    './/tr[.//th="members:" or .//th="original members:"]//a[@title]//bdi//text()')
                 member_info = members[0].xpath(
                     './/*[not(self::th)]//text()[following::br]')
                 member_info = filter(None, [ x.strip("[] \n") for x in member_info])
