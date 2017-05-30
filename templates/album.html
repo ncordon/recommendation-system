@@ -19,7 +19,7 @@
           {% endif %}
         </td>
       </tr>
-     
+
       <tr class="pure-table-odd odd-fix">
         <td>Canciones:</td>
         <td>
@@ -30,7 +30,7 @@
               <th>Explícita</th>
             </tr>
           <ul>
-            {% for song in songs %}
+            {% for song in album.songs %}
              <tr class="pure-table-odd">
                 <td>
                     <li><a href='{{song.spotify_url}}'>{{song.name}}</a></li>
@@ -45,9 +45,9 @@
                     {% endif %}
                 </td>
               </tr>
-              
+
             {% endfor %}
-              
+
           </ul>
         </table>
         </td>

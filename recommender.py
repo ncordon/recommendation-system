@@ -17,7 +17,7 @@ Return:
 """
 def get_recommendations(values):
     request_queue = Queue.Queue()
-    values = [ group for group in values if group != None ]
+    values = [ group.title() for group in values if group != None ]
     threads = []
     recommendations = []
     union_recommendations = []

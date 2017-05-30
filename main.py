@@ -11,7 +11,8 @@ app = Flask(__name__)
 def normalize(arg):
     # Normalize argument. If we query for example Porcupine Tree, the HTTP petition gets done
     # with "Porcupine%20Tree"
-    return arg.replace("%20", " ")
+    arg = arg.replace("%20", " ")
+    return arg.title()
 
 
 @app.route("/about")
@@ -29,7 +30,7 @@ def recommend():
     result = request.form
     values = result.values()
     # Elimina strings vacíos de la lista, esto es, artistas no introducidos
-    values = filter(None, values)
+    values = [v for v in values if v!= None]
 
     if values:
         try:
@@ -64,8 +65,7 @@ def echo_album(group_name, album_name):
     try:
         album_name = normalize(album_name)
         album = data_handler.get_album(group_name, album_name)
-        songs = data_handler.get_songs(album)
-        return render_template("album.html", album = album, songs = songs)
+        return render_template("album.html", album = album)
     except Exception:
         return render_template("error.html", msg =
                                str("Lo sentimos, no encontramos el disco que buscas"))
