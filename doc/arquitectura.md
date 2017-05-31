@@ -31,7 +31,7 @@ header-includes:
 
 # Descripción
 
-Nuestro sistema pide al usuario un determinado número de grupos afines (grupos 'modelo'). A partir de dichos grupos obtenemos una predicción, basándonos en grupos afines obtenidos a partir de las APIs de Youtube y de Spotify. Para los grupos sugeridos además, proporciona información biográfica, álbumes de dichos grupos, etc.
+Nuestro sistema pide al usuario un determinado número de grupos afines (grupos 'modelo'). A partir de dichos grupos obtenemos una predicción, basándonos en grupos afines obtenidos a partir de las APIs de Youtube,  Spotify y a partir de un scraping de MusicBrainz. Para los grupos sugeridos además, proporciona información biográfica, álbumes de dichos grupos, etc.
 
 # Vistas
 
@@ -39,12 +39,12 @@ Nuestro sistema pide al usuario un determinado número de grupos afines (grupos 
 
 En nuestro punto de vista funcional reseñamos los siguientes elementos:
 
-  - **Navegador web**: elemento funcional externo, que se ejecuta del lado del cliente. Accede a través de la interfaz de predicciones, mediante peticiones HTTP al *gestor de predicciones*.
-  - **Gestor de predicciones**: se ha pensado en este módulo como un elemento que sintentiza todos los grupos afines sugeridos para unos grupos modelo de entrada, escoge cuáles mostrarle al usuario y devuelve la respuesta al navegador web. Solicita al *gestor de datos* la información disponible para grupos afines a los introducidos por el usuario en el navegador web.
-  - **Gestor de datos de grupos**: se encarga de acceder a los datos de grupos, y en caso de no existir o estar desactualizados, llama al *recolector de datos*. Caso opuesto devuelve la información al *gestor de predicciones*.
-  - **Recolector de datos**: se encargar de acceder a los datos a través de las APIs o el *scrapeo* y los devuelve al gestor de datos de grupos para la actualización en la base de datos.
+  - **Navegador web**: Elemento funcional externo, que se ejecuta del lado del cliente. Accede a través de la interfaz de predicciones, mediante peticiones HTTP al *gestor de predicciones*.
+  - **Gestor de predicciones**: Se ha pensado en este módulo como un elemento que sintentiza todos los grupos afines sugeridos para unos grupos modelo de entrada, escoge cuáles mostrarle al usuario y devuelve la respuesta al navegador web. Solicita al *gestor de datos* la información disponible para grupos afines a los introducidos por el usuario en el navegador web.
+  - **Gestor de datos de grupos**: Se encarga de acceder a los datos de grupos, y en caso de no existir o estar desactualizados, llama al *recolector de datos*. Caso opuesto devuelve la información al *gestor de predicciones*.
+  - **Recolector de datos**: Se encarga de acceder a los datos a través de las APIs o el *scrapeo* y los devuelve al gestor de datos de grupos para la actualización en la base de datos.
 
-En nuestro caso se ha decidido separar en un único módulo funcional el acceso a la base de datos (escritura y lectura de información de grupos afines).  
+En nuestro caso se ha decidido separar en un único módulo funcional el acceso a la base de datos (escritura y lectura de información de grupos).  
 
 \imgn{1}{./img/funcional.png}
 
@@ -52,26 +52,34 @@ En nuestro caso se ha decidido separar en un único módulo funcional el acceso 
 
 La información del sistema se almacenará de la siguiente forma:
 
-  - **Grupo**: representa la información relativa a un grupo. Cada grupo contiene uno o varios discos que a su vez estan formados por varias canciones.
-  - **Recomendación**: clase para representar la gestión de predicciones. Dado que solo usaremos una instancia del recomendador usaremos una clase singleton.
-  - **Respuesta**: cada uno de los objetos producidos por el recomendador como respuesta a una petición.
+  - **Grupo**: Clase que representa la información relativa a un grupo.
+  - **Album**: Clase que representa la información relativa a los albums de un grupo. Cada album está relacionado con su grupo correspondiente.
+  - **Canción**: Clase que representa la información relativa a las canciones de un Album. Cada canción está relacionada con su album correspondiente.
+  - **Recomendación(Base de datos)**: Clase que representa la información relativa a las recomendaciones de los grupos consultados en el sistema.
+  - **Manejador de datos de Spotify**: Clase que se encarga de la recolección de datos de Spotify, haciendo uso de una API determinada.  
+  - **Manejador de datos de Youtube**: Clase que se encarga de la recolección de datos de Youtube, haciendo uso de una API determinada.
+  - **Manejador de datos de MusicBrainz**: Clase que se encarga de la recolección de datos de Musicbrainz, realizando un scraping sobre la misma.
+  - **Manejador de datos**: Clase que se encarga de la gestión de los datos de la base de datos, es la encargada de realizar consultas e inserciones sobre la misma.
+  - **Recomendación**: Clase para representar la gestión de predicciones. Dado que solo usaremos una instancia del recomendador usaremos una clase singleton.
 
-\imgn{1}{./img/clases.png}
+\imgn{1.05}{./img/clases.png}
 
 ## Punto de vista de concurrencia
 
 Hay varios estados por los que tiene que pasar el sistema:
 
- - **Solicitud de grupos modelo**: el usuario debe introducir una serie de grupos que ya le gustan.
- - **Solicitud de grupos afines**: una vez se han introducido los grupos modelo, se solicitan los grupos afines al sistema.
-- **Devuelve resultado**: en caso de que haya datos para los grupos modelo introducidos, se devuelve el resultado y llegamos al estado final.
-- **Actualización de grupos afines**: caso de que no existan datos, o lleven sin actualizarse un determinado tiempo, se recolectan los datos y se escriben en la base de datos, y se procede al estado *Devuelve resultado*.
+ - **Solicitud de grupos modelo**: El usuario debe introducir una serie de grupos que ya le gustan.
+ - **Solicitud de grupos afines**: Una vez se han introducido los grupos modelo, se solicitan los grupos afines al sistema.
+ - **Devuelve resultado**: En caso de que haya datos para los grupos modelo introducidos, se devuelve el resultado y llegamos al estado final.
+ - **Actualización de grupos afines**: Caso de que no existan datos, o lleven sin actualizarse un determinado tiempo, se recolectan los datos y se escriben en la base de datos, y se procede al estado *Devuelve resultado*.
 
 \imgn{0.7}{./img/concurrencia-estados.png}
 
 Debería existir una actualización concurrente de los datos de grupos, caso de que no existan en el sistema o estén desactualizados. Hemos tratado de modelar esto en el siguiente diagrama:
 
 \imgn{0.9}{./img/concurrencia.png}
+
+Finalmente el uso de un proceso *cron* para actualizar la base de datos no es viable haciendo uso de de la capacidad aportada de manera gratuita por google app engine, debido a que
 
 ## Punto de vista de desarrollo
 
@@ -130,9 +138,17 @@ El modelo de instalación para el sistema de recomendación de música debe cons
     * Linux/UNIX: Es necesario descargar e instalar a través de la terminal el software a partir de  los archivos obtenido de la web oficial de python:
     [https://www.python.org/downloads/source/](https://www.python.org/downloads/source/)
   * Librería flask para python: Una vez instalado python la librería se instala ejecutando el comando `pip install flask`.
-  * Base de datos: Google App engine trabaja directamente con una base de datos noSQL, tan solo sería necesario instalar el esquema de base de datos en el sistema.
-  * Librería Recomendadora: Se trata de la librería principal del sistema, se darán más detalles de instalación más adelante.
+  * Librería spotipy para python: Una vez instalado python la librería se instala ejecutando el comando `pip install spotipy`.
+  * Librería google-api-python-client para python: Una vez instalado python la librería se instala ejecutando el comando `pip install google-api-python-client`.
+  * Librería requests para python: Una vez instalado python la librería se instala ejecutando el comando `pip install requests`.
+  * Librería fuzzywuzzy para python: Una vez instalado python la librería se instala ejecutando el comando `pip install fuzzywuzzy`.
+  * Librería python-Levenshtein para python: Una vez instalado python la librería se instala ejecutando el comando `pip install python-Levenshtein`.
+  * Librería python-dateutil para python: Una vez instalado python la librería se instala ejecutando el comando `pip install python-dateutil`.
 
+  * Base de datos: Google App engine trabaja directamente con una base de datos noSQL, tan solo sería necesario instalar el esquema de base de datos en el sistema.
+  * Librería del sistema: Inclusión de las librerías desarrolladas para realizar la recomendación, recolección y gestión de datos.
+
+Se ha desarrollado un archivo makefile que permite realizar la configuración de las librerías de python necesarias para la ejecución del sistema, además de permitir montar localmente el sistema.
 
 ### Migración del sistema y los datos
 
@@ -153,11 +169,12 @@ Para la restauración del sistema se barajan dos posibilidades:
 # Diseño arquitectonico
 El sistema se diseñará siguiendo una arquitectura por capas. Esta decisión se debe a que se pueden identificar claramente varias partes del sistema que pueden ser desarrolladas independientemente. El sistema consta de 3 capas:
 
-  * **Interfaz de usuario**: su labor es mostrar información al usuario y comunicarse con él. Esta capa se comunica con la capa de gestión de predicciones obteniendo los datos que deben ser mostrados.
-  * **Gestor de predicciones**: en esta capa se lleva a cabo la funcionalidad del sistema. Se comunica con la capa de gestión de datos.
-  * **Gestor de datos**: es la encargada de realizar lecturas y escrituras a la base de datos, así como de la obtención de datos de las distintas fuentes.
+  * **Interfaz de usuario**: Su labor es mostrar información al usuario y comunicarse con él. Esta capa se comunica con la capa de gestión de predicciones obteniendo los datos que deben ser mostrados.
+  * **Gestor de predicciones**: En esta capa se lleva a cabo la funcionalidad del sistema. Se comunica con la capa de gestión de datos para construir una recomendación basandose en lo introducido por el usuario.
+  * **Gestor de datos**: Es la encargada realizar las consultas sobre la base de datos además de las inserciones de grupos, albumes y canciones. También incorpora funcionalidades para realizar la integración de los datos obtenidos a partir del gestor de recolección de datos.
+  * **Recolección de datos**: Almacena los manejadores de datos de Spotify, Musicbrainz y Youtube por lo que es el que se va a encargar de la recolección de los datos haciendo uso de las APIs y el scraping.
 
-\imgn{0.5}{./img/capas.png}
+\imgn{0.35}{./img/capas.png}
 
 ## Justificación - Arquitectura basada en capas
 
