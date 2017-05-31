@@ -1,4 +1,4 @@
-﻿---
+---
 author:
 - Lothar Soto Palma
 - Daniel López García
@@ -187,3 +187,12 @@ Otros diseños considerados:
   * Modelo no relacional: en principio se asemejaba mucho a la clase de sistema de información que queriamos desarrollar, pero consideramos que el uso de herramientas como mapReduce para este sistema se excede con respecto al uso final del mismo.
   * Modelo multidimensional: descartado debido a las limitaciones sobre el cálculo y ancho de banda impuestas por AppEngine. Se decide implementar la actualización de datos de manera que se realice bajo demanda por parte de la aplicación de los mismos, y se descarta emplear un procedimiento ETL que por ejemplo actualicase los datos disponibles en base de datos durante el periodo de menor uso del sistema.
   * Flujo de datos: a pesar de ajustarse bastante bien al diseño de nuestro sistema, su menor capacidad de modularización en caso de querer ampliarse la aplicación ha sido un factor determinante para escoger el modelo de capas.
+
+# Modelo de integración de datos. 
+Realizaremos la integración de datos de 3 fuentes de datos: 
+
+ * Spotify: Haciendo uso de la API obtendremos información de cada grupo, sus discos publicados y las canciones que componen dichos álbumes. Además, obtendremos la lista de grupos similares que será la base de nuestra recomendación.
+ * Youtube: Usando su API obtenemos el canal de cada grupo y el video de cada álbum
+ * Musicbrainz: Mediante scraping obtendremos información de cada grupo y su discografía.
+ 
+ \imgn{1}{./img/integracion.png}
