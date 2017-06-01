@@ -1,5 +1,5 @@
 # Another recommendation system
-Music recommendation system made by @Lothar94, @daniL16, @ncordon with academic purpose.
+Music recommendation system made by [@Lothar94](https://github.com/lothar94), [@daniL16](https://github.com/daniL16), [@ncordon](https://github.com/ncordon) with academic purpose.
 
 Deployed [here](http://recommendation-system-160616.appspot.com/)
 
@@ -9,7 +9,7 @@ Deployed [here](http://recommendation-system-160616.appspot.com/)
 ## How does it work?
 You have to introduce from 1 to 3 groups you like (normally, kind of similar) and the system will ask Spotify API for recommendations. We have or own refinement's algorithm to offer more proper recommendations based on year, area, genres and MusicBrainz's tags for a group.
 
-When you get a recommendation, you can consult deeper information about a specific group. 
+When you get a recommendation, you can consult deeper information about a specific group.
 
 All recent searches are kept in cache of Google App Engine, and group information alredy asked for is stored in a database for more later queries.
 
@@ -44,5 +44,4 @@ To try the app locally, `python 2.7` and `Google Cloud Python SDK` are required.
 
 - `make mount` to try the application locally
 
-- Enter [localhost:8080](localhost:8080) in your web browser
-
+- Enter [localhost:8080](http://localhost:8080) in your web browser
