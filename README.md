@@ -1,8 +1,6 @@
 # Another recommendation system
 Music recommendation system made by [@Lothar94](https://github.com/lothar94), [@daniL16](https://github.com/daniL16), [@ncordon](https://github.com/ncordon) with academic purpose.
 
-Deployed [here](http://recommendation-system-160616.appspot.com/)
-
 ![](./doc/img/ars.png)
 
 
